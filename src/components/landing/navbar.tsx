@@ -11,6 +11,7 @@ import {
   RiEditBoxLine,
 } from "@remixicon/react";
 import { usePathname } from "next/navigation";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
 
 export default function NavbarLanding() {
   const [hasPostedJobs, setHasPostedJobs] = useState(false);
@@ -41,7 +42,7 @@ export default function NavbarLanding() {
   }, [mobileOpen]);
 
   const navLinks = [
-    { href: "/", label: "Home" },
+    { href: "/", label: "beranda" },
     { href: "/umkm", label: "Cek UMKM" },
     { href: "/dashboard", label: "Dashboard" },
     { href: "/help", label: "Panduan" },
@@ -95,12 +96,11 @@ export default function NavbarLanding() {
 
           {/* ACTIONS DESKTOP */}
           <div className="hidden xl:flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-[#77746E] border border-[#F6D39E] bg-[#FBF6F0] py-2 px-7 rounded-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-103 cursor-pointer"
-            >
-              Masuk
-            </Link>
+            <ShimmerButton className="shadow-2xl">
+              <a href="/login" className="cursor-pointer text-[14px]">
+                Masuk
+              </a>
+            </ShimmerButton>
             {/* {userData ? ( */}
             {/* <Link
                 href="/profile"
