@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Larisin",
-    default: "Larisin - Platform Terbaik Kamu",
+    template: "%s | LarisIn",
+    default: "LarisIn - Sehat sehat UMKM",
   },
-  description: "Aplikasi manajemen dan landing page modern",
+  description: "anu mas",
 };
 
 export default function RootLayout({
