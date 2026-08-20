@@ -12,9 +12,9 @@ export default function LandingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-white">
       <NavbarLanding />
-      <main className="flex-1">{children}</main>
+      <main className="relative z-0 flex-1 bg-white">{children}</main>
     </div>
   );
 }

@@ -182,7 +182,7 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
         aria-busy={loading || undefined}
         className={cn(
           componentThemeClassName,
-          "relative inline-flex h-12 cursor-pointer touch-manipulation select-none items-center justify-center overflow-hidden rounded-xl px-8 text-[15px] text-black",
+          "relative inline-flex h-12 cursor-pointer touch-manipulation select-none items-center justify-center overflow-hidden rounded-xl px-5 text-[15px] text-black",
           "border-[0.5px] border-border bg-white text-black",
           "dark:bg-muted dark:text-foreground",
           "transition-[color,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
