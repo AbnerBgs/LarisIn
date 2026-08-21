@@ -8,9 +8,38 @@ import {
   RiMailLine,
   RiFileCopyLine,
   RiCheckLine,
+  RiStore2Line,
+  RiBriefcaseLine,
+  RiBarChartBoxLine,
 } from "@remixicon/react";
+import { FeatureCard } from "@/components/ui/featured-card";
+import { NoteCard } from "@/components/ui/note-card";
+import { ClerkProvider, Show, SignUpButton } from "@clerk/nextjs";
 
 export default function LandingPage() {
+  const features = [
+    {
+      code: "001",
+      icon: RiStore2Line,
+      title: "Eksplorasi UMKM",
+      description: "Cari tempat usaha lokal, lihat katalog produk, dan cek lokasi terdekat.",
+      image: "/img/landing/explore.png",
+    },
+    {
+      code: "002",
+      icon: RiBriefcaseLine,
+      title: "Lowongan Lokal",
+      description: "Temukan info lowongan kerja yang diposting langsung oleh pemilik UMKM.",
+      image: "/img/landing/hiring.jpg",
+    },
+    {
+      code: "003",
+      icon: RiBarChartBoxLine,
+      title: "Dashboard Penjualan",
+      description: "Pantau grafik omzet harian dan ekspor rekap transaksi ke Excel.",
+      image: "/img/landing/dashboard.jpg",
+    },
+  ];
   return (
     <div className="relative top-0 z-0 bg-white text-slate-900 flex flex-col font-sans">
       {/* 1. HERO SECTION */}
@@ -18,10 +47,10 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center justify-center w-full min-h-screen md:min-h-[calc(100vh-5rem)]">
           {/* Left Text */}
           <div className="lg:col-span-7 space-y-5">
-            <h1 className="font-display text-6xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-5xl font-bold tracking-tight text-slate-900">
               Temukan UMKM sekitar<br/>
               bantu usahamu makin{" "}
-              <span className="text-[#0D47A1]">laris</span>
+              <span className="text-[#0D47A1]">laris.</span>
             </h1>
 
             <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-lg">
@@ -34,19 +63,12 @@ export default function LandingPage() {
                 href="/cek-umkm"
               >
                 <OriginButton 
-                  className="bg-[#3284ff] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all drop-shadow-[0_4px_0_rgba(0,0,0,1)] hover:drop-shadow-[0_0px_0_rgba(0,0,0,1)] hover:translate-y-1">
+                  className="bg-blue-400 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hard-shadow">
                   Jelajahi UMKM
                 </OriginButton>
               </Link>
-              {/* <Link
-                href="/dashboard"
-                className="bg-white hover:bg-slate-50 text-slate-700 font-medium px-5 py-2.5 rounded-lg text-sm border border-slate-300 transition-all"
-              >
-                Kelola usahamu
-              </Link> */}
-
               <OriginButton
-                className="shadow-[0_1px_0_rgba(17,17,17,0.06)] hover:border-black hover:bg-black hover:text-whitebg-[#3284ff] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all drop-shadow-[0_4px_0_rgba(0,0,0,1)] hover:drop-shadow-[0_0px_0_rgba(0,0,0,1)] hover:translate-y-1"
+                className="bg-amber-300 hover:text-whitebg-[#3284ff] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hard-shadow"
                 onClick={() => {
                   const link = document.createElement("a");
                   link.href = "/dashboard";
@@ -54,7 +76,7 @@ export default function LandingPage() {
                 }}
               >
                 <span className="inline-flex items-center gap-2">
-                  Mulai
+                  Mulai Kelola Toko
                   <RiArrowRightLine className="h-4 w-4" />
                 </span>
               </OriginButton>
@@ -63,120 +85,120 @@ export default function LandingPage() {
 
           {/* Right Preview Card */}
           <div className="lg:col-span-5">
-            <div className="border border-slate-200 rounded-2xl p-5 bg-slate-50 shadow-xs space-y-3">
-              <div className="flex justify-between items-center text-xs text-slate-500 font-medium border-b border-slate-200 pb-2">
-                <span>Preview Toko Terdaftar</span>
-                <span className="text-[#0D47A1] font-semibold">Aktif</span>
-              </div>
-              <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm">
-                      Warung Kopi Bu Slamet
-                    </h4>
-                    <p className="text-xs text-slate-500">
-                      Kuliner • Sleman, Yogyakarta
-                    </p>
-                  </div>
-                  <span className="text-xs bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded border border-amber-200">
-                    ★ 4.8
-                  </span>
-                </div>
-                <div className="pt-2 border-t border-slate-100 flex justify-between text-xs text-slate-600">
-                  <span>12 Produk</span>
-                  <span className="text-[#0D47A1] font-medium">
-                    1 Lowongan Kerja
-                  </span>
-                </div>
-              </div>
-            </div>
+            <NoteCard
+              storeName="Warung Kopi Bu Slamet"
+              category="Kuliner"
+              location="Sleman, Yogyakarta"
+              rating={4.8}
+              productCount={12}
+              jobCount={1}
+            />
           </div>
         </div>
       </section>
 
       {/* 2. FEATURE SECTION */}
-      <section className="max-w-6xl mx-auto px-6 py-14 w-full border-t border-slate-100">
-        <h2 className="text-xl font-bold text-slate-900 text-center mb-8">
-          Satu platform, semua kebutuhan
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="p-5 border border-slate-200 rounded-xl bg-white hover:border-[#0D47A1]/50 transition-all space-y-2">
-            <h3 className="font-bold text-slate-900">Eksplorasi UMKM</h3>
-            <p className="text-sm text-slate-600">
-              Cari tempat usaha lokal, lihat katalog produk, dan cek lokasi
-              terdekat.
-            </p>
+      <section className="mx-auto px-6 py-14 w-full border-t border-slate-200 bg-slate-50">
+        <div className="max-w-6xl mx-auto px-6 w-full min-h-[600] content-center">
+          <div className="max-w-xl mx-auto text-center mb-12">
+            <span className="font-mono text-xs tracking-[0.2em] uppercase text-indigo-500">
+              Fitur Larisin
+            </span>
+            <h2 className="font-display font-bold text-3xl md:text-4xl mt-2">
+              Satu platform, semua kebutuhan
+            </h2>
           </div>
-
-          <div className="p-5 border border-slate-200 rounded-xl bg-white hover:border-[#0D47A1]/50 transition-all space-y-2">
-            <h3 className="font-bold text-slate-900">Lowongan Lokal</h3>
-            <p className="text-sm text-slate-600">
-              Temukan informasi lowongan kerja yang di-posting langsung oleh
-              pemilik UMKM.
-            </p>
-          </div>
-
-          <div className="p-5 border border-slate-200 rounded-xl bg-white hover:border-[#0D47A1]/50 transition-all space-y-2">
-            <h3 className="font-bold text-slate-900">Dashboard Penjualan</h3>
-            <p className="text-sm text-slate-600">
-              Pantau grafik omzet harian dan export rekap transaksi ke file
-              Excel.
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {features.map((f) => (
+              <FeatureCard key={f.code} {...f} />
+            ))}
           </div>
         </div>
       </section>
 
       {/* 3. HOW IT WORKS SECTION */}
-      <section className="bg-slate-50 border-t border-slate-200 py-14">
-        <div className="max-w-6xl mx-auto px-6 w-full">
-          <h2 className="text-xl font-bold text-slate-900 text-center mb-8">
-            Cara kerja LarisIn
-          </h2>
-
+      <section className="bg-white border-t border-slate-200 py-14">
+        <div className="max-w-6xl mx-auto px-6 w-full min-h-[600] content-center">
+          <div className="max-w-xl mx-auto text-center mb-12">
+            <span className="font-mono text-xs tracking-[0.2em] uppercase text-indigo-500">
+              Mudah digunakan
+            </span>
+            <h2 className="font-display font-bold text-3xl md:text-4xl mt-2">
+              Cara kerja LarisIn
+            </h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-6 bg-white border border-slate-200 rounded-xl space-y-3">
-              <h3 className="font-bold text-[#0D47A1] text-base">
-                Untuk Pengunjung
-              </h3>
-              <ul className="text-sm text-slate-600 space-y-1.5 list-disc list-inside">
-                <li>Cari UMKM berdasarkan lokasi atau kategori.</li>
-                <li>Lihat katalog produk & kontak pemilik toko.</li>
-                <li>Lamar lowongan kerja lokal secara langsung.</li>
-              </ul>
-            </div>
-
-            <div className="p-6 bg-white border border-slate-200 rounded-xl space-y-3">
-              <h3 className="font-bold text-[#0D47A1] text-base">
-                Untuk Pemilik UMKM
-              </h3>
-              <ul className="text-sm text-slate-600 space-y-1.5 list-disc list-inside">
-                <li>Daftar akun & buat profil usaha.</li>
-                <li>Upload katalog produk dan info lowongan.</li>
-                <li>Catat penjualan & unduh laporan keuangan ke Excel.</li>
-              </ul>
-            </div>
+            {[
+              {
+                title: "Untuk Pengunjung",
+                steps: [
+                  "Cari UMKM berdasarkan lokasi atau kategori.",
+                  "Lihat katalog produk & kontak pemilik toko.",
+                  "Lamar lowongan kerja lokal secara langsung.",
+                ],
+              },
+              {
+                title: "Untuk Pemilik UMKM",
+                steps: [
+                  "Daftar akun & buat profil usaha.",
+                  "Unggah katalog produk dan info lowongan.",
+                  "Catat penjualan & unduh laporan ke Excel.",
+                ],
+              },
+            ].map((col) => (
+              <div
+                key={col.title}
+                className="p-6 md:p-7 bg-white border-1 border-black rounded-2xl space-y-4"
+              >
+                <h3 className="font-display font-bold text-indigo-800 text-lg">
+                  {col.title}
+                </h3>
+                <ul className="space-y-3">
+                  {col.steps.map((step, i) => (
+                    <li key={step} className="flex items-start gap-3 text-sm text-slate-600">
+                      <span className="flex-shrink-0 h-5 w-5 rounded-full bg-indigo-400 text-white font-mono text-[11px] flex items-center justify-center mt-0.5">
+                        {i + 1}
+                      </span>
+                      <span className="leading-relaxed">{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* 4. CTA BANNER SECTION */}
-      <section className="max-w-6xl mx-auto px-6 py-14 w-full">
-        <div className="bg-[#0D47A1] text-white rounded-2xl p-8 text-center space-y-4">
-          <h2 className="text-2xl font-bold">
-            Punya UMKM? Daftarkan sekarang, gratis
+      <section className="px-6 py-14 w-full border-t border-slate-200 bg-sky-600">
+        <div className="max-w-6xl mx-auto text-white rounded-2xl p-8 text-center space-y-4 min-h-100 content-center">
+          <h2 className="text-5xl font-bold text-amber-300">
+            Punya UMKM?<br/>
+            Daftarkan sekarang, Gratis
           </h2>
-          <p className="text-blue-100 text-sm max-w-md mx-auto">
+          <p className="text-md max-w-md mx-auto">
             Perluas jangkauan usahamu dan kelola pencatatan penjualan dengan
             lebih gampang.
           </p>
           <div className="pt-2">
-            <Link
-              href="/dashboard"
-              className="inline-block bg-white text-[#0D47A1] font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-blue-50 transition-all"
-            >
-              Daftar Gratis
-            </Link>
+            <ClerkProvider>
+              <Show when="signed-out">
+                <SignUpButton>
+                  <OriginButton className="bg-amber-300  text-black font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all hard-shadow">
+                    Daftar Gratis
+                  </OriginButton>
+                </SignUpButton>
+              </Show>
+              <Show when="signed-in">
+                <Link
+                  href="/dashboard"
+                >
+                  <OriginButton className="bg-amber-300 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hard-shadow inline-flex">
+                    Lanjut ke Dashboard <RiArrowRightLine className="h-4 w-4" />
+                  </OriginButton>
+                </Link>
+              </Show>
+            </ClerkProvider>
           </div>
         </div>
       </section>
