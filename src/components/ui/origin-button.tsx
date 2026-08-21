@@ -271,7 +271,6 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
         }}
         ref={setMergedRef}
         type={type}
-        whileTap={isDisabled ? undefined : { scale: 0.985 }}
       >
         <motion.span
           animate={{ scale: showFill && coverSize > 0 ? 1 : 0 }}
