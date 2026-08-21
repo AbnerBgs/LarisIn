@@ -13,6 +13,7 @@ import {
 } from "@remixicon/react";
 import { usePathname } from "next/navigation";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { OriginButton } from "../ui/origin-button";
 
 export default function NavbarLanding() {
   const [hasPostedJobs, setHasPostedJobs] = useState(false);
@@ -103,9 +104,9 @@ export default function NavbarLanding() {
                   <a className="cursor-pointer">Masuk</a>
                 </SignInButton>
                 <SignUpButton>
-                  <button className="bg-[#FFCC00] hover:bg-[#e6b800] text-black font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all drop-shadow-[0_4px_0_rgba(0,0,0,1)] hover:drop-shadow-[0_0px_0_rgba(0,0,0,1)] hover:translate-y-1">
+                  <OriginButton className="bg-[#FFCC00] hover:bg-[#e6b800] text-black font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all drop-shadow-[0_4px_0_rgba(0,0,0,1)] hover:drop-shadow-[0_0px_0_rgba(0,0,0,1)] hover:translate-y-1">
                     Buat Akun
-                  </button>
+                  </OriginButton>
                 </SignUpButton>
               </Show>
               <Show when="signed-in">
