@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import Link from "next/link";
 import {
   RiAddLine,
@@ -69,7 +70,7 @@ export default function NavbarLanding() {
               className="object-contain"
             />
           </Link> */}
-          <h1 className="text-2xl font-bold">LarisIN</h1>
+          <h1 className="text-2xl font-bold">LarisIn</h1>
         </div>
 
         <div className="flex gap-10">
@@ -96,58 +97,21 @@ export default function NavbarLanding() {
 
           {/* ACTIONS DESKTOP */}
           <div className="hidden xl:flex items-center gap-4">
-            <ShimmerButton className="shadow-2xl">
-              <a href="/login" className="cursor-pointer text-[14px]">
-                Masuk
-              </a>
-            </ShimmerButton>
-            {/* {userData ? ( */}
-            {/* <Link
-                href="/profile"
-                className="flex items-center gap-3 px-4 py-1.5 rounded-full border border-[#F6D39E] bg-[#FBF6F0]/80 hover:bg-[#FBF6F0] transition"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E2D2B4] text-xs font-bold text-[#386641]">
-                  {getUsernameInitials(profileData?.displayName ?? "")}
-                </div>
-                <span className="text-sm font-semibold text-[#386641] max-w-30 truncate">
-                  {profileData?.displayName ?? ""}
-                </span>
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="text-[#77746E] border border-[#F6D39E] bg-[#FBF6F0] py-2 px-9 rounded-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-103 cursor-pointer"
-              >
-                Masuk
-              </Link> */}
-            {/* )} */}
-
-            {/* DYNAMIC ACTION BUTTON
-            {shouldShowManageJobs ? (
-              <Link
-                href="/jobs/manage"
-                className="bg-[#F4991A] text-white py-2 px-4 rounded-md transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-103 cursor-pointer flex items-center gap-1.5 font-medium text-base"
-              >
-                <RiEditBoxLine size={20} />
-                Kelola Pekerjaan
-              </Link>
-            ) : userData?.isFreelancer ? (
-              <Link
-                href="/jobs"
-                className="bg-[#386641] text-white py-2 px-4 rounded-md transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-103 cursor-pointer flex items-center gap-1.5 font-medium text-base"
-              >
-                <RiSearchLine size={20} />
-                Cari Lowongan
-              </Link>
-            ) : (
-              <Link
-                href="/jobs/create"
-                className="bg-[#F4991A] text-white py-2 px-4 rounded-md transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-103 cursor-pointer flex items-center gap-1.5 font-medium text-base"
-              >
-                <RiAddLine size={20} />
-                Post Pekerjaan
-              </Link>
-            )} */}
+            <ClerkProvider>
+              <Show when="signed-out">
+                <SignInButton>
+                  <a className="cursor-pointer">Masuk</a>
+                </SignInButton>
+                <SignUpButton>
+                  <button className="bg-[#FFCC00] hover:bg-[#e6b800] text-black font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all drop-shadow-[0_4px_0_rgba(0,0,0,1)] hover:drop-shadow-[0_0px_0_rgba(0,0,0,1)] hover:translate-y-1">
+                    Buat Akun
+                  </button>
+                </SignUpButton>
+              </Show>
+              <Show when="signed-in">
+                <UserButton />
+              </Show>
+            </ClerkProvider>
           </div>
         </div>
         {/* HAMBURGER MOBILE */}
