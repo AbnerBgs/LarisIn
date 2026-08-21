@@ -26,7 +26,7 @@ export function FeatureCard({
 }: FeatureCardProps) {
   const content = (
     <div
-      className={`group border-1 rounded-2xl overflow-hidden bg-white hard-shadow h-full ${className}`}
+      className={`group border rounded-2xl overflow-hidden bg-white hard-shadow-static h-full ${className}`}
     >
       <div
         className="relative h-36 bg-cover bg-top"
@@ -36,7 +36,7 @@ export function FeatureCard({
           {code}
         </span>
       </div>
-      <div className="p-5 space-y-2 border-t-1">
+      <div className="p-5 space-y-2 border-t">
         <Icon className="h-5 w-5 text-indigo-500" />
         <h3 className="font-display font-bold text-base">{title}</h3>
         <p className="text-sm text-black leading-relaxed">

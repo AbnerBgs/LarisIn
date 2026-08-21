@@ -130,38 +130,52 @@ export default function LandingPage() {
             {[
               {
                 title: "Untuk Pengunjung",
+                subtitle: "user",
                 steps: [
                   "Cari UMKM berdasarkan lokasi atau kategori.",
                   "Lihat katalog produk & kontak pemilik toko.",
                   "Lamar lowongan kerja lokal secara langsung.",
                 ],
+                image: "/img/landing/user.jpg",
               },
               {
                 title: "Untuk Pemilik UMKM",
+                subtitle: "owner",
                 steps: [
                   "Daftar akun & buat profil usaha.",
                   "Unggah katalog produk dan info lowongan.",
                   "Catat penjualan & unduh laporan ke Excel.",
                 ],
+                image: "/img/landing/owner.jpg",
               },
             ].map((col) => (
               <div
                 key={col.title}
-                className="p-6 md:p-7 bg-white border-1 border-black rounded-2xl space-y-4"
+                className="p-6 md:p-7 bg-white border border-black rounded-2xl space-y-4 hard-shadow-static"
               >
-                <h3 className="font-display font-bold text-indigo-800 text-lg">
-                  {col.title}
-                </h3>
-                <ul className="space-y-3">
-                  {col.steps.map((step, i) => (
-                    <li key={step} className="flex items-start gap-3 text-sm text-slate-600">
-                      <span className="flex-shrink-0 h-5 w-5 rounded-full bg-indigo-400 text-white font-mono text-[11px] flex items-center justify-center mt-0.5">
-                        {i + 1}
-                      </span>
-                      <span className="leading-relaxed">{step}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div
+                  className="relative h-60 bg-cover bg-top"
+                  style={{ backgroundImage: `url('${col.image}')` }}
+                >
+                  <span className="absolute font-mono text-[10px] tracking-widest bg-white border px-2 py-0.5 rounded uppercase">
+                    {col.subtitle}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-indigo-800 text-lg pb-4">
+                    {col.title}
+                  </h3>
+                  <ul className="space-y-3">
+                    {col.steps.map((step, i) => (
+                      <li key={step} className="flex items-start gap-3 text-sm text-slate-600">
+                        <span className="flex-shrink-0 h-5 w-5 rounded-full bg-indigo-400 text-white font-mono text-[11px] flex items-center justify-center mt-0.5">
+                          {i + 1}
+                        </span>
+                        <span className="leading-relaxed">{step}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             ))}
           </div>

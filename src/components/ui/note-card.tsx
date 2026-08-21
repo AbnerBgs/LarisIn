@@ -30,9 +30,8 @@ export function NoteCard({
 
   return (
     <div
-      className={`relative border-1 border-black rounded-lg overflow-hidden bg-white shadow-[6px_6px_0_0_#1c1b17] max-w-sm ${className}`}
+      className={`relative border border-black rounded-lg overflow-hidden bg-white hard-shadow-static py-6 max-w-sm ${className}`}
     >
-      <div className="notch-top" />
       <div className="px-5 pt-1 pb-5">
         <div className="flex justify-between items-center font-mono text-[11px] uppercase tracking-widest text-slate-500 border-b border-dashed border-black/30 pb-3 mb-3">
           <span>Nota Digital · Toko Terdaftar</span>
@@ -64,7 +63,6 @@ export function NoteCard({
           {stampLabel}
         </div>
       </div>
-      <div className="notch-bottom" />
     </div>
   );
 }
