@@ -43,39 +43,37 @@ export default function LandingPage() {
   return (
     <div className="relative top-0 z-0 bg-white text-slate-900 flex flex-col font-sans">
       {/* 1. HERO SECTION */}
-      <section className="relative top-0 z-0 max-w-7xl mx-auto px-6 w-full pt-0 pb-0">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center justify-center w-full min-h-screen md:min-h-[calc(100vh-5rem)]">
+      <section className="relative top-0 z-0 max-w-7xl mx-auto px-6 w-full py-14 lg:py-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-10 items-center justify-center w-full lg:min-h-[calc(100vh-5rem)]">
           {/* Left Text */}
-          <div className="lg:col-span-7 space-y-5">
-            <h1 className="text-5xl font-bold tracking-tight text-slate-900">
-              Temukan UMKM sekitar<br/>
+          <div className="lg:col-span-7 flex flex-col items-center text-center lg:items-start lg:text-left space-y-4 sm:space-y-5">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+              Temukan UMKM sekitar,
+              <br className="hidden sm:block" />{" "}
               bantu usahamu makin{" "}
               <span className="text-[#0D47A1]">laris.</span>
             </h1>
 
-            <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-lg">
+            <p className="text-slate-600 text-sm sm:text-base md:text-lg leading-relaxed max-w-md lg:max-w-lg">
               Cari produk lokal, cek info lowongan kerja, atau kelola pencatatan
               penjualan tokomu di satu tempat.
             </p>
 
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Link
-                href="/cek-umkm"
-              >
-                <OriginButton 
-                  className="bg-blue-400 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hard-shadow">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 pt-2">
+              <Link href="/cek-umkm" className="w-full sm:w-auto">
+                <OriginButton className="w-full sm:w-auto bg-blue-400 font-medium text-sm sm:text-base h-12 px-4 sm:px-5 cursor-pointer hard-shadow">
                   Jelajahi UMKM
                 </OriginButton>
               </Link>
               <OriginButton
-                className="bg-amber-300 hover:text-whitebg-[#3284ff] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hard-shadow"
+                className="w-full sm:w-auto bg-amber-300 hover:text-white font-medium text-sm sm:text-base h-12 px-4 sm:px-5 cursor-pointer hard-shadow"
                 onClick={() => {
                   const link = document.createElement("a");
                   link.href = "/dashboard";
                   link.click();
                 }}
               >
-                <span className="inline-flex items-center gap-2">
+                <span className="inline-flex items-center justify-center gap-2">
                   Mulai Kelola Toko
                   <RiArrowRightLine className="h-4 w-4" />
                 </span>
@@ -84,7 +82,7 @@ export default function LandingPage() {
           </div>
 
           {/* Right Preview Card */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 w-full flex justify-center pt-2 lg:pt-0">
             <NoteCard
               storeName="Warung Kopi Bu Slamet"
               category="Kuliner"
@@ -92,6 +90,7 @@ export default function LandingPage() {
               rating={4.8}
               productCount={12}
               jobCount={1}
+              className="w-full"
             />
           </div>
         </div>
