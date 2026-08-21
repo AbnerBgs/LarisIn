@@ -18,8 +18,9 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center justify-center w-full min-h-screen md:min-h-[calc(100vh-5rem)]">
           {/* Left Text */}
           <div className="lg:col-span-7 space-y-5">
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-snug">
-              Temukan UMKM sekitar, bantu usahamu makin{" "}
+            <h1 className="font-display text-6xl font-bold tracking-tight text-slate-900">
+              Temukan UMKM sekitar<br/>
+              bantu usahamu makin{" "}
               <span className="text-[#0D47A1]">laris</span>
             </h1>
 
@@ -31,9 +32,11 @@ export default function LandingPage() {
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
                 href="/cek-umkm"
-                className="bg-[#0D47A1] hover:bg-[#0A3882] text-white font-medium px-5 py-2.5 rounded-full md:rounded-xl text-sm transition-all shadow-xs"
               >
-                Jelajahi UMKM
+                <OriginButton 
+                  className="bg-[#3284ff] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all drop-shadow-[0_4px_0_rgba(0,0,0,1)] hover:drop-shadow-[0_0px_0_rgba(0,0,0,1)] hover:translate-y-1">
+                  Jelajahi UMKM
+                </OriginButton>
               </Link>
               {/* <Link
                 href="/dashboard"
@@ -43,7 +46,7 @@ export default function LandingPage() {
               </Link> */}
 
               <OriginButton
-                className="h-11 rounded-full md:rounded-xl border border-black/15 bg-white text-black shadow-[0_1px_0_rgba(17,17,17,0.06)] hover:border-black hover:bg-black hover:text-white"
+                className="shadow-[0_1px_0_rgba(17,17,17,0.06)] hover:border-black hover:bg-black hover:text-whitebg-[#3284ff] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all drop-shadow-[0_4px_0_rgba(0,0,0,1)] hover:drop-shadow-[0_0px_0_rgba(0,0,0,1)] hover:translate-y-1"
                 onClick={() => {
                   const link = document.createElement("a");
                   link.href = "/dashboard";
@@ -51,7 +54,7 @@ export default function LandingPage() {
                 }}
               >
                 <span className="inline-flex items-center gap-2">
-                  Get Started
+                  Mulai
                   <RiArrowRightLine className="h-4 w-4" />
                 </span>
               </OriginButton>
