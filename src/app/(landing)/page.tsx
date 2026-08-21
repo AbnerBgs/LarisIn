@@ -66,7 +66,7 @@ export default function LandingPage() {
                 </OriginButton>
               </Link>
               <OriginButton
-                className="w-full sm:w-auto bg-amber-300 hover:text-white font-medium text-sm sm:text-base h-12 px-4 sm:px-5 cursor-pointer hard-shadow"
+                className="w-full sm:w-auto bg-amber-300 border border-black hover:text-white font-medium text-sm sm:text-base h-12 px-4 sm:px-5 cursor-pointer hard-shadow"
                 onClick={() => {
                   const link = document.createElement("a");
                   link.href = "/dashboard";
