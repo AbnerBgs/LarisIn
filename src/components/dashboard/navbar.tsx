@@ -108,6 +108,11 @@ const navMenus: NavCategory[] = [
     label: 'Sistem',
     navItems: [
       {
+        label: 'Profile Usaha',
+        href: '/profile',
+        icon: RiSettings3Line,
+      },
+      {
         label: 'Pengaturan',
         href: '/settings',
         icon: RiSettings3Line,
@@ -161,9 +166,12 @@ function NavbarContent() {
       <aside className="hidden md:flex md:w-64 md:h-screen md:flex-col md:sticky md:top-0 md:shrink-0 border-r border-gray-200 bg-white">
         {/* Logo */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 px-5">
-          <span className="text-lg font-bold tracking-tight text-gray-900">
+          <Link 
+            href="/" 
+            className="text-lg font-bold tracking-tight text-gray-900 hover:text-blue-600 transition-colors"
+          >
             LarisIn
-          </span>
+          </Link>
         </div>
 
         {/* Buat Baru */}
