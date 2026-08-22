@@ -9,15 +9,7 @@ import { OriginButton } from "../ui/origin-button";
 
 export default function NavbarLanding() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-
-  // SCROLL HANDLER
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // LOCK BODY SCROLL SAAT MENU MOBILE TERBUKA
   useEffect(() => {
@@ -37,13 +29,7 @@ export default function NavbarLanding() {
   return (
     <>
       <nav
-        className={`sticky top-0 z-50 grid grid-cols-[auto_1fr_auto] items-center backdrop-blur-lg h-20 px-4 md:px-15 transition-all duration-300 ease-out ${
-          mobileOpen
-            ? "bg-white shadow-md shadow-black/10"
-            : isScrolled
-              ? "bg-white/10 shadow-md shadow-black/10"
-              : "shadow-none"
-        }`}
+        className={`sticky top-0 z-50 grid grid-cols-[auto_1fr_auto] bg-white border-b border-b-zinc-200 items-center h-20 px-4 md:px-15 transition-all duration-300 ease-out`}
       >
         {/* LOGO */}
         <div className="flex items-center">
@@ -122,10 +108,10 @@ export default function NavbarLanding() {
               key={link.label}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className={`py-2 px-2 text-base rounded ${
+              className={`py-2 px-2 text-base rounded-md ${
                 isActive
-                  ? "bg-[#FBF6F0] text-black font-semibold"
-                  : "hover:bg-gray-50"
+                  ? "bg-blue-100 text-black font-semibold"
+                  : "hover:bg-blue-50"
               }`}
             >
               {link.label}
