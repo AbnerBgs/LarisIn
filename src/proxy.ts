@@ -15,3 +15,5 @@ export const config = {
     '/__clerk/(.*)',
   ],
 };
+
+// The "middleware" file convention is deprecated. Please use "proxy" instead.
