@@ -23,21 +23,24 @@ export default function LandingPage() {
       code: "001",
       icon: RiStore2Line,
       title: "Eksplorasi UMKM",
-      description: "Cari tempat usaha lokal, lihat katalog produk, dan cek lokasi terdekat.",
+      description:
+        "Cari tempat usaha lokal, lihat katalog produk, dan cek lokasi terdekat.",
       image: "/img/landing/explore.png",
     },
     {
       code: "002",
       icon: RiBriefcaseLine,
       title: "Lowongan Lokal",
-      description: "Temukan info lowongan kerja yang diposting langsung oleh pemilik UMKM.",
+      description:
+        "Temukan info lowongan kerja yang diposting langsung oleh pemilik UMKM.",
       image: "/img/landing/hiring.jpg",
     },
     {
       code: "003",
       icon: RiBarChartBoxLine,
       title: "Dashboard Penjualan",
-      description: "Pantau grafik omzet harian dan ekspor rekap transaksi ke Excel.",
+      description:
+        "Pantau grafik omzet harian dan ekspor rekap transaksi ke Excel.",
       image: "/img/landing/dashboard.jpg",
     },
   ];
