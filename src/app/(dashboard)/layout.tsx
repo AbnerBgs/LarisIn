@@ -1,13 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { SignIn } from "@clerk/nextjs";
-import Navbar from "@/components/dashboard/navbar"; 
+import Navbar from "@/components/dashboard/navbar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "LarisIn",
   description: "Dashboard penjualan LarisIn",
 };
-
 export default async function DashboardLayout({
   children,
 }: {

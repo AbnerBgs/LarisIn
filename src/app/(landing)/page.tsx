@@ -22,21 +22,24 @@ export default function LandingPage() {
       code: "001",
       icon: RiStore2Line,
       title: "Eksplorasi UMKM",
-      description: "Cari tempat usaha lokal, lihat katalog produk, dan cek lokasi terdekat.",
+      description:
+        "Cari tempat usaha lokal, lihat katalog produk, dan cek lokasi terdekat.",
       image: "/img/landing/explore.png",
     },
     {
       code: "002",
       icon: RiBriefcaseLine,
       title: "Lowongan Lokal",
-      description: "Temukan info lowongan kerja yang diposting langsung oleh pemilik UMKM.",
+      description:
+        "Temukan info lowongan kerja yang diposting langsung oleh pemilik UMKM.",
       image: "/img/landing/hiring.jpg",
     },
     {
       code: "003",
       icon: RiBarChartBoxLine,
       title: "Dashboard Penjualan",
-      description: "Pantau grafik omzet harian dan ekspor rekap transaksi ke Excel.",
+      description:
+        "Pantau grafik omzet harian dan ekspor rekap transaksi ke Excel.",
       image: "/img/landing/dashboard.jpg",
     },
   ];
@@ -49,8 +52,7 @@ export default function LandingPage() {
           <div className="lg:col-span-7 flex flex-col items-center text-center lg:items-start lg:text-left space-y-4 sm:space-y-5">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
               Temukan UMKM sekitar,
-              <br className="hidden sm:block" />{" "}
-              bantu usahamu makin{" "}
+              <br className="hidden sm:block" /> bantu usahamu makin{" "}
               <span className="text-[#0D47A1]">laris.</span>
             </h1>
 
@@ -167,7 +169,10 @@ export default function LandingPage() {
                   </h3>
                   <ul className="space-y-3">
                     {col.steps.map((step, i) => (
-                      <li key={step} className="flex items-start gap-3 text-sm text-slate-600">
+                      <li
+                        key={step}
+                        className="flex items-start gap-3 text-sm text-slate-600"
+                      >
                         <span className="flex-shrink-0 h-5 w-5 rounded-full bg-indigo-400 text-white font-mono text-[11px] flex items-center justify-center mt-0.5">
                           {i + 1}
                         </span>
@@ -186,7 +191,8 @@ export default function LandingPage() {
       <section className="px-6 py-14 w-full border-t border-slate-200 bg-sky-600">
         <div className="max-w-6xl mx-auto text-white rounded-2xl p-8 text-center space-y-4 min-h-100 content-center">
           <h2 className="text-5xl font-bold text-amber-300">
-            Punya UMKM?<br/>
+            Punya UMKM?
+            <br />
             Daftarkan sekarang, Gratis
           </h2>
           <p className="text-md max-w-md mx-auto">
@@ -205,6 +211,8 @@ export default function LandingPage() {
               <Show when="signed-in">
                 <Link
                   href="/dashboard"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <OriginButton className="bg-amber-300 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hard-shadow inline-flex">
                     Lanjut ke Dashboard <RiArrowRightLine className="h-4 w-4" />
