@@ -19,7 +19,6 @@ import {
   RiMapLine,
 } from '@remixicon/react';
 import {
-  ClerkProvider,
   Show,
   SignInButton,
   UserButton,
@@ -145,14 +144,6 @@ const mobileNavItems: NavItem[] = [
 ];
 
 export default function Navbar() {
-  return (
-    <ClerkProvider>
-      <NavbarContent />
-    </ClerkProvider>
-  );
-}
-
-function NavbarContent() {
   const pathname = usePathname();
   const { isLoaded, user } = useUser();
 
@@ -187,7 +178,7 @@ function NavbarContent() {
         <nav className="flex-1 space-y-5 overflow-y-auto px-3 pt-4">
           {navMenus.map(({ label, navItems }) => (
             <div key={label}>
-              <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <p className="mb-2 px-3 text-xs font-mono font-semibold uppercase tracking-wider text-gray-400">
                 {label}
               </p>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import Link from "next/link";
 import { RiMenuLine, RiCloseLine } from "@remixicon/react";
 import { usePathname } from "next/navigation";
@@ -75,21 +75,19 @@ export default function NavbarLanding() {
 
         {/* RIGHT SIDE: auth buttons always visible + hamburger toggle */}
         <div className="flex items-center justify-end gap-3 sm:gap-4">
-          <ClerkProvider>
-            <Show when="signed-out">
-              <SignInButton>
-                <a className="cursor-pointer text-sm sm:text-base">Masuk</a>
-              </SignInButton>
-              <SignUpButton>
-                <OriginButton className="bg-amber-300  text-black font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all hard-shadow">
-                  Buat Akun
-                </OriginButton>
-              </SignUpButton>
-            </Show>
-            <Show when="signed-in">
-              <UserButton />
-            </Show>
-          </ClerkProvider>
+          <Show when="signed-out">
+            <SignInButton>
+              <a className="cursor-pointer text-sm sm:text-base">Masuk</a>
+            </SignInButton>
+            <SignUpButton>
+              <OriginButton className="bg-amber-300  text-black font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all hard-shadow">
+                Buat Akun
+              </OriginButton>
+            </SignUpButton>
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
 
           {/* HAMBURGER — only for nav links, visible under 880px */}
           <button
