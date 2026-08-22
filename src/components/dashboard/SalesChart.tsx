@@ -147,7 +147,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   const full = payload[0]?.payload?.fullLabel ?? label;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 shadow-lg shadow-slate-900/5">
+    <div className="rounded-lg border hard-shadow-static bg-white px-3.5 py-2.5 shadow-lg shadow-slate-900/5">
       <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400 mb-1.5">{full}</p>
       {revenue != null && (
         <div className="flex items-center gap-2 text-sm">
