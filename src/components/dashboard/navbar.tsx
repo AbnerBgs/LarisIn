@@ -58,7 +58,7 @@ const navMenus: NavCategory[] = [
       },
       {
         label: 'Scan Barcode',
-        href: '/scan',
+        href: '/dashboard/scan',
         icon: RiBarcodeBoxLine,
       },
       {
@@ -133,7 +133,7 @@ const mobileNavItems: NavItem[] = [
   },
   {
     label: 'Scan',
-    href: '/scan',
+    href: '/dashboard/scan',
     icon: RiBarcodeBoxLine,
   },
   {

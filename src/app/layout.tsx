@@ -28,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="id">
+      <html lang="id" data-scroll-behavior="smooth">
         <body
           className={`${dmSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white text-slate-900`}
         >
