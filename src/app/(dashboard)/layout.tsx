@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import Navbar from '@/components/dashboard/navbar';
+import type { Metadata } from "next";
+import Navbar from "@/components/dashboard/navbar";
 
 export const metadata: Metadata = {
-  title: 'LarisIn',
-  description: 'Dashboard penjualan LarisIn',
+  title: "Dashboard",
+  description: "Dashboard penjualan LarisIn",
 };
 
 export default function RootLayout({
