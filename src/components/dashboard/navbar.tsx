@@ -17,6 +17,18 @@ import {
   RiSettings3Line,
   RiMoreLine,
   RiMapLine,
+  RiIdCardLine,
+  RiDashboardFill,
+  RiBox3Fill,
+  RiBarcodeBoxFill,
+  RiStackFill,
+  RiShoppingCartFill,
+  RiFileList3Fill,
+  RiGroupFill,
+  RiMoneyDollarCircleFill,
+  RiBarChartBoxFill,
+  RiIdCardFill,
+  RiSettings3Fill,
 } from '@remixicon/react';
 import {
   Show,
@@ -35,6 +47,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: RemixiconComponentType;
+  activeIcon?: RemixiconComponentType;
 }
 
 const navMenus: NavCategory[] = [
@@ -45,6 +58,7 @@ const navMenus: NavCategory[] = [
         label: 'Dashboard',
         href: '/dashboard',
         icon: RiDashboardLine,
+        activeIcon: RiDashboardFill,
       },
     ],
   },
@@ -55,16 +69,19 @@ const navMenus: NavCategory[] = [
         label: 'Produk',
         href: '/product',
         icon: RiBox3Line,
+        activeIcon: RiBox3Fill,
       },
       {
         label: 'Scan Barcode',
         href: '/scan',
         icon: RiBarcodeBoxLine,
+        activeIcon: RiBarcodeBoxFill,
       },
       {
         label: 'Stok',
         href: '/stock',
         icon: RiStackLine,
+        activeIcon: RiStackFill,
       },
     ],
   },
@@ -75,16 +92,19 @@ const navMenus: NavCategory[] = [
         label: 'Penjualan',
         href: '/sales',
         icon: RiShoppingCartLine,
+        activeIcon: RiShoppingCartFill,
       },
       {
         label: 'Pesanan',
         href: '/orders',
         icon: RiFileList3Line,
+        activeIcon: RiFileList3Fill,
       },
       {
         label: 'Pelanggan',
         href: '/customers',
         icon: RiGroupLine,
+        activeIcon: RiGroupFill,
       },
     ],
   },
@@ -95,11 +115,13 @@ const navMenus: NavCategory[] = [
         label: 'Keuangan',
         href: '/finance',
         icon: RiMoneyDollarCircleLine,
+        activeIcon: RiMoneyDollarCircleFill,
       },
       {
         label: 'Analytics',
         href: '/analytics',
         icon: RiBarChartBoxLine,
+        activeIcon: RiBarChartBoxFill,
       },
     ],
   },
@@ -109,12 +131,14 @@ const navMenus: NavCategory[] = [
       {
         label: 'Profile Usaha',
         href: '/profile',
-        icon: RiSettings3Line,
+        icon: RiIdCardLine,
+        activeIcon: RiIdCardFill,
       },
       {
         label: 'Pengaturan',
         href: '/settings',
         icon: RiSettings3Line,
+        activeIcon: RiSettings3Fill,
       },
     ],
   },
@@ -186,14 +210,16 @@ export default function Navbar() {
         <nav className="flex-1 space-y-5 overflow-y-auto px-3 pt-4">
           {navMenus.map(({ label, navItems }) => (
             <div key={label}>
-              <p className="mb-2 px-3 text-xs font-mono font-semibold uppercase tracking-wider text-gray-400">
+              <p className="mb-2 px-3 text-xs font-mono font-semibold uppercase tracking-widest text-gray-400">
                 {label}
               </p>
 
               <div className="space-y-1">
-                {navItems.map(({ label, href, icon: Icon }) => {
+                {navItems.map(({ label, href, icon: Icon, activeIcon: ActiveIcon }) => {
                   const active =
                     pathname === href || pathname.startsWith(`${href}/`);
+
+                  const CurrentIcon = active ? ActiveIcon ?? Icon : Icon
 
                   return (
                     <Link
@@ -206,10 +232,11 @@ export default function Navbar() {
                           : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
                       }`}
                     >
-                      <Icon
+                      <CurrentIcon
                         size={18}
                         strokeWidth={active ? 2.25 : 2}
                       />
+                      
 
                       <span>{label}</span>
                     </Link>

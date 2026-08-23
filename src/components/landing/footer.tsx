@@ -5,6 +5,7 @@ import {
   RiLinkedinLine,
   RiArrowRightUpLine,
 } from '@remixicon/react';
+import Image from 'next/image';
 
 export default function FooterLanding() {
   return (
@@ -18,9 +19,7 @@ export default function FooterLanding() {
               href="/"
               className="inline-flex items-center gap-2 text-xl font-bold text-white"
             >
-              <div className="flex size-8 items-center justify-center rounded-lg bg-white text-sm font-bold text-zinc-900">
-                Li
-              </div>
+              <Image src={"/icon.svg"} alt={"icon"} width={32} height={32}/>
 
               LarisIn
             </Link>

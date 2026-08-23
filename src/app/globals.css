@@ -102,6 +102,10 @@ body {
   }
 }
 
+.receipt-edge {
+  mask: conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/16px 100%
+}
+
 .hard-shadow-static {
   box-shadow: 0 4px 0 #1c1b17;
   transition:
