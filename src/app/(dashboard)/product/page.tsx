@@ -73,13 +73,12 @@ export default function ProductsPage() {
   const [stockRange, setStockRange] = useState<[number, number]>([0, 100]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Ambil semua kategori unik
   const categories = useMemo(() => {
     const cats = products.map(p => p.category);
     return ['Semua', ...new Set(cats)];
   }, []);
 
-  // Filter produk
+  // Filter
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
       // Search
