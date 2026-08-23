@@ -1,5 +1,5 @@
-import SalesChart from '@/components/dashboard/SalesChart';
-import PleaseReveal from '@/components/ui/please-reveal';
+import SalesChart from "@/components/dashboard/SalesChart";
+import PleaseReveal from "@/components/ui/please-reveal";
 import {
   RiSearchLine,
   RiArrowDownSLine,
@@ -9,8 +9,8 @@ import {
   RemixiconComponentType,
   RiCurrencyLine,
   RiMoneyDollarCircleLine,
-  RiGroup3Line
-} from '@remixicon/react';
+  RiGroup3Line,
+} from "@remixicon/react";
 
 type StatCard = {
   label: string;
@@ -23,44 +23,44 @@ type StatCard = {
 
 const stats: StatCard[] = [
   {
-    label: 'Total Pendapatan',
-    value: 'Rp1.992.300,00',
-    change: '+8% dari bulan lalu',
-    bg: 'bg-blue-100',
-    valueColor: 'text-blue-900',
-    icon: RiCurrencyLine
+    label: "Total Pendapatan",
+    value: "Rp1.992.300,00",
+    change: "+8% dari bulan lalu",
+    bg: "bg-blue-100",
+    valueColor: "text-blue-900",
+    icon: RiCurrencyLine,
   },
   {
-    label: 'Pendapatan Bersih',
-    value: 'Rp992.300,00',
-    change: '+8% dari bulan lalu',
-    bg: 'bg-amber-100',
-    valueColor: 'text-amber-900',
+    label: "Pendapatan Bersih",
+    value: "Rp992.300,00",
+    change: "+8% dari bulan lalu",
+    bg: "bg-amber-100",
+    valueColor: "text-amber-900",
     icon: RiMoneyDollarCircleLine,
   },
   {
-    label: 'Total Pengunjung',
-    value: '199',
-    change: '+8% dari bulan lalu',
-    bg: 'bg-emerald-100',
-    valueColor: 'text-emerald-900',
+    label: "Total Pengunjung",
+    value: "199",
+    change: "+8% dari bulan lalu",
+    bg: "bg-emerald-100",
+    valueColor: "text-emerald-900",
     icon: RiGroup3Line,
   },
 ];
 
 const topSales = [
-  { name: 'Nasi Goreng', value: 1240 },
-  { name: 'Mie Ayam', value: 980 },
-  { name: 'Sate Ayam', value: 870 },
-  { name: 'Rendang', value: 870 },
-  { name: 'Bakso', value: 680 },
-  { name: 'Es Teh Manis', value: 620 }, 
-  { name: 'Ayam Geprek', value: 540 },
+  { name: "Nasi Goreng", value: 1240 },
+  { name: "Mie Ayam", value: 980 },
+  { name: "Sate Ayam", value: 870 },
+  { name: "Rendang", value: 870 },
+  { name: "Bakso", value: 680 },
+  { name: "Es Teh Manis", value: 620 },
+  { name: "Ayam Geprek", value: 540 },
 ];
 
 const maxSales = Math.max(...topSales.map((item) => item.value));
 
-export default async function () {
+export default async function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <section className="mx-auto max-w-6xl px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">
@@ -86,12 +86,19 @@ export default async function () {
                     </span>
                     <stat.icon size={20} className="text-gray-600" />
                   </div>
-                  <div className={`${stat.bg} p-4 rounded-xl border hard-shadow`}>
-                    <p className={`text-2xl font-mono font-bold ${stat.valueColor}`}>
+                  <div
+                    className={`${stat.bg} p-4 rounded-xl border hard-shadow`}
+                  >
+                    <p
+                      className={`text-2xl font-mono font-bold ${stat.valueColor}`}
+                    >
                       {stat.value}
                     </p>
                     <p className="mt-1 flex items-center gap-1 text-xs font-mono text-gray-600">
-                      <RiArrowRightUpLine size={14} className="text-green-600" />
+                      <RiArrowRightUpLine
+                        size={14}
+                        className="text-green-600"
+                      />
                       {stat.change}
                     </p>
                   </div>
@@ -100,7 +107,7 @@ export default async function () {
             </div>
           </div>
         </PleaseReveal>
-        
+
         <PleaseReveal>
           <div className="mt-8">
             <div className="flex items-start justify-between gap-3">
@@ -125,7 +132,9 @@ export default async function () {
               <h3 className="text-sm font-semibold text-gray-900">
                 Penjualan Teratas
               </h3>
-              <p className="text-xs text-gray-500">Total unit terjual per item</p>
+              <p className="text-xs text-gray-500">
+                Total unit terjual per item
+              </p>
               <SalesChart />
             </div>
           </div>

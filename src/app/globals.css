@@ -26,7 +26,7 @@
   --color-solid-7a: color-mix(in srgb, var(--color-solid-7) 80%, transparent);
   --color-solid-brand-1: #1074b6; /* brand */
   --color-solid-brand-2: #2e96ea;
-  --color-solid-info-1: #18828a;  
+  --color-solid-info-1: #18828a;
 
   --color-chart-1: #8884d8; /* Indigo */
   --color-chart-2: #82ca9d; /* Green */
@@ -103,7 +103,13 @@ body {
 }
 
 .receipt-edge {
-  mask: conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/16px 100%
+  mask: conic-gradient(
+      from -45deg at bottom,
+      #0000,
+      #000 1deg 89deg,
+      #0000 90deg
+    )
+    50%/16px 100%;
 }
 
 .hard-shadow-static {
@@ -130,20 +136,55 @@ body {
   box-shadow: 0 0 0 #1c1b17;
 }
 
-.notch-bottom { transform: scaleY(-1); }
+.notch-bottom {
+  transform: scaleY(-1);
+}
 
 .stamp {
-  border: 2px solid #CD1C18;
-  color: #CD1C18;
+  border: 2px solid #cd1c18;
+  color: #cd1c18;
   transform: rotate(-9deg);
   mix-blend-mode: multiply;
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-.animate-fade-up { animation: fade-up 0.7s ease-out both; }
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-up { animation: none; }
+  .animate-fade-up {
+    animation: none;
+  }
+}
+
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+  #receipt,
+  #receipt * {
+    visibility: visible;
+  }
+  #receipt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 58mm;
+    margin: 0;
+    padding: 4mm;
+  }
 }

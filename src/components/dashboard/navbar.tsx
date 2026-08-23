@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   RiAddLine,
   RemixiconComponentType,
@@ -29,18 +29,13 @@ import {
   RiBarChartBoxFill,
   RiIdCardFill,
   RiSettings3Fill,
-} from '@remixicon/react';
-import {
-  Show,
-  SignInButton,
-  UserButton,
-  useUser,
-} from '@clerk/nextjs';
-import { OriginButton } from '../ui/origin-button';
+} from "@remixicon/react";
+import { Show, SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { OriginButton } from "../ui/origin-button";
 
 interface NavCategory {
   label: string;
-  navItems: NavItem[]
+  navItems: NavItem[];
 }
 
 interface NavItem {
@@ -52,91 +47,85 @@ interface NavItem {
 
 const navMenus: NavCategory[] = [
   {
-    label: 'Utama',
+    label: "Utama",
     navItems: [
       {
-        label: 'Dashboard',
-        href: '/dashboard',
+        label: "Dashboard",
+        href: "/dashboard",
         icon: RiDashboardLine,
         activeIcon: RiDashboardFill,
       },
     ],
   },
   {
-    label: 'Inventory',
+    label: "Inventory",
     navItems: [
       {
-        label: 'Produk',
-        href: '/product',
+        label: "Produk",
+        href: "/product",
         icon: RiBox3Line,
         activeIcon: RiBox3Fill,
       },
+      // {
+      //   label: 'Scan Barcode',
+      //   href: '/scan',
+      //   icon: RiBarcodeBoxLine,
+      //   activeIcon: RiBarcodeBoxFill,
+      // },
       {
-        label: 'Scan Barcode',
-        href: '/scan',
-        icon: RiBarcodeBoxLine,
-        activeIcon: RiBarcodeBoxFill,
-      },
-      {
-        label: 'Stok',
-        href: '/stock',
+        label: "Stok",
+        href: "/stock",
         icon: RiStackLine,
         activeIcon: RiStackFill,
       },
     ],
   },
   {
-    label: 'Penjualan',
+    label: "Penjualan",
     navItems: [
       {
-        label: 'Penjualan',
-        href: '/sales',
-        icon: RiShoppingCartLine,
-        activeIcon: RiShoppingCartFill,
-      },
-      {
-        label: 'Pesanan',
-        href: '/orders',
+        label: "Kasir",
+        href: "/orders",
         icon: RiFileList3Line,
         activeIcon: RiFileList3Fill,
       },
       {
-        label: 'Pelanggan',
-        href: '/customers',
-        icon: RiGroupLine,
-        activeIcon: RiGroupFill,
+        label: "Penjualan",
+        href: "/sales",
+        icon: RiShoppingCartLine,
+        activeIcon: RiShoppingCartFill,
       },
     ],
   },
   {
-    label: 'Bisnis',
+    label: "Bisnis",
     navItems: [
       {
-        label: 'Keuangan',
-        href: '/finance',
+        label: "Keuangan",
+        href: "/finance",
         icon: RiMoneyDollarCircleLine,
         activeIcon: RiMoneyDollarCircleFill,
       },
       {
-        label: 'Analytics',
-        href: '/analytics',
+        label: "Analytics",
+        href: "/analytics",
         icon: RiBarChartBoxLine,
         activeIcon: RiBarChartBoxFill,
       },
     ],
   },
   {
-    label: 'Sistem',
+    label: "Sistem",
     navItems: [
       {
-        label: 'Profile Usaha',
-        href: '/profile',
+        label: "Profile Usaha",
+        href: "/profile",
         icon: RiIdCardLine,
         activeIcon: RiIdCardFill,
       },
       {
-        label: 'Pengaturan',
-        href: '/settings',
+        label: "Pengaturan",
+        href: "/settings",
         icon: RiSettings3Line,
         activeIcon: RiSettings3Fill,
       },
@@ -146,28 +135,28 @@ const navMenus: NavCategory[] = [
 
 const mobileNavItems: NavItem[] = [
   {
-    label: 'Dashboard',
-    href: '/dashboard',
+    label: "Dashboard",
+    href: "/dashboard",
     icon: RiDashboardLine,
   },
   {
-    label: 'Explore',
-    href: '/product',
+    label: "Explore",
+    href: "/product",
     icon: RiMapLine,
   },
   {
-    label: 'Scan',
-    href: '/dashboard/scan',
+    label: "Scan",
+    href: "/dashboard/scan",
     icon: RiBarcodeBoxLine,
   },
   {
-    label: 'Penjualan',
-    href: '/sales',
+    label: "Penjualan",
+    href: "/sales",
     icon: RiShoppingCartLine,
   },
   {
-    label: 'Lainnya',
-    href: '/more',
+    label: "Lainnya",
+    href: "/more",
     icon: RiMoreLine,
   },
 ];
@@ -181,8 +170,8 @@ export default function Navbar() {
       <aside className="hidden md:flex md:w-64 md:h-screen md:flex-col md:sticky md:top-0 md:shrink-0 border-r border-gray-200 bg-white">
         {/* Logo */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 px-5">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="text-lg font-bold tracking-tight text-gray-900 hover:text-blue-600 transition-colors"
           >
             LarisIn
@@ -215,33 +204,34 @@ export default function Navbar() {
               </p>
 
               <div className="space-y-1">
-                {navItems.map(({ label, href, icon: Icon, activeIcon: ActiveIcon }) => {
-                  const active =
-                    pathname === href || pathname.startsWith(`${href}/`);
+                {navItems.map(
+                  ({ label, href, icon: Icon, activeIcon: ActiveIcon }) => {
+                    const active =
+                      pathname === href || pathname.startsWith(`${href}/`);
 
-                  const CurrentIcon = active ? ActiveIcon ?? Icon : Icon
+                    const CurrentIcon = active ? (ActiveIcon ?? Icon) : Icon;
 
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      aria-current={active ? 'page' : undefined}
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                        active
-                          ? 'bg-gray-100 text-gray-900'
-                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
-                      }`}
-                    >
-                      <CurrentIcon
-                        size={18}
-                        strokeWidth={active ? 2.25 : 2}
-                      />
-                      
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        aria-current={active ? "page" : undefined}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          active
+                            ? "bg-gray-100 text-gray-900"
+                            : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                        }`}
+                      >
+                        <CurrentIcon
+                          size={18}
+                          strokeWidth={active ? 2.25 : 2}
+                        />
 
-                      <span>{label}</span>
-                    </Link>
-                  );
-                })}
+                        <span>{label}</span>
+                      </Link>
+                    );
+                  },
+                )}
               </div>
             </div>
           ))}
@@ -264,17 +254,17 @@ export default function Navbar() {
               className="flex w-full items-center gap-3 rounded-xl bg-amber-300 px-3 py-2 text-black border hard-shadow cursor-pointer transition-all"
               onClick={(e) => {
                 const target = e.currentTarget.querySelector(
-                  'button'
+                  "button",
                 ) as HTMLButtonElement | null;
 
                 target?.click();
               }}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
 
                   const target = e.currentTarget.querySelector(
-                    'button'
+                    "button",
                   ) as HTMLButtonElement | null;
 
                   target?.click();
@@ -293,7 +283,7 @@ export default function Navbar() {
 
               {isLoaded && (
                 <span className="truncate text-sm font-medium">
-                  {user?.username ?? user?.firstName ?? 'Pengguna'}
+                  {user?.username ?? user?.firstName ?? "Pengguna"}
                 </span>
               )}
             </div>
@@ -302,38 +292,32 @@ export default function Navbar() {
       </aside>
 
       {/* Mobile navigation */}
-        <nav
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur md:hidden"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-        >
-          <ul className="flex items-stretch justify-between px-1">
-            {mobileNavItems.map(({ label, href, icon: Icon }) => {
-              const active =
-                pathname === href || pathname.startsWith(`${href}/`);
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur md:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <ul className="flex items-stretch justify-between px-1">
+          {mobileNavItems.map(({ label, href, icon: Icon }) => {
+            const active = pathname === href || pathname.startsWith(`${href}/`);
 
-              return (
-                <li key={href} className="flex-1">
-                  <Link
-                    href={href}
-                    aria-current={active ? 'page' : undefined}
-                    className={`flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors ${
-                      active
-                        ? 'text-blue-600'
-                        : 'text-gray-400'
-                    }`}
-                  >
-                    <Icon
-                      size={20}
-                      strokeWidth={active ? 2.4 : 2}
-                    />
+            return (
+              <li key={href} className="flex-1">
+                <Link
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors ${
+                    active ? "text-blue-600" : "text-gray-400"
+                  }`}
+                >
+                  <Icon size={20} strokeWidth={active ? 2.4 : 2} />
 
-                    <span>{label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+                  <span>{label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
     </>
   );
 }
