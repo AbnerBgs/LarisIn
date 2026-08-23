@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-// import { RiAddLine, RiDeleteBinLine } from '@remixicon/react';
 import ProductCombobox from "@/components/dashboard/product-combobox";
 import OrderReceipt from "@/components/dashboard/order-receipt";
 import type { Product } from "@/app/(dashboard)/orders/product";
-import { RiAddLine, RiDeleteBinLine } from "@remixicon/react";
+import { RiAddLine, RiDeleteBinLine, RiRefreshLine } from "@remixicon/react";
 
 interface OrderItem {
   id: string;
@@ -16,6 +15,7 @@ interface OrderItem {
 }
 
 interface OrderFormData {
+  cashierName: string;
   paymentType: string;
   items: OrderItem[];
 }
@@ -36,6 +36,7 @@ const createEmptyItem = (): OrderItem => ({
 
 export default function OrdersPage() {
   const [formData, setFormData] = useState<OrderFormData>({
+    cashierName: "",
     paymentType: "qris",
     items: [createEmptyItem()],
   });
@@ -104,6 +105,13 @@ export default function OrdersPage() {
       `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
   );
 
+  const handleReset = () => {
+    setFormData({
+      cashierName: "",
+      paymentType: "qris",
+      items: [createEmptyItem()],
+    });
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       <section className="mx-auto max-w-6xl px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">
@@ -111,13 +119,42 @@ export default function OrdersPage() {
           {/* FORM */}
           <div className="group bg-white w-full rounded-2xl border border-black hard-shadow-static overflow-hidden">
             <div className="relative h-auto p-5">
-              <h1 className="font-semibold text-xl">New Order</h1>
-              <p className="text-md">Fill in the order details below</p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="font-semibold text-xl">New Order</h1>
+                  <p className="text-md">Fill in the order details below</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="flex items-center gap-1.5 bg-red-500 cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition print:hidden"
+                >
+                  <RiRefreshLine size={14} />
+                  Reset
+                </button>
+              </div>
               <form
                 onSubmit={handleSubmit}
                 className=" rounded-2xl mt-5 max-w-2xl mx-auto print:hidden"
               >
                 <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-1.5">
+                      Cashier Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      placeholder="Name"
+                      value={formData.cashierName}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          cashierName: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-800 mb-1.5">
                       Payment Type <span className="text-red-500">*</span>
@@ -232,6 +269,7 @@ export default function OrdersPage() {
             </div>
 
             <OrderReceipt
+              cashier={formData.cashierName}
               orderNumber={orderNumber}
               paymentType={formData.paymentType}
               items={formData.items}

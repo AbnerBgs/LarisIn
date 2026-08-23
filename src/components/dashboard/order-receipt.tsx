@@ -1,4 +1,3 @@
-// components/dashboard/order-receipt.tsx
 "use client";
 
 interface OrderItem {
@@ -9,6 +8,7 @@ interface OrderItem {
 }
 
 interface OrderReceiptProps {
+  cashier: string;
   orderNumber: string;
   paymentType: string;
   items: OrderItem[];
@@ -17,6 +17,7 @@ interface OrderReceiptProps {
 }
 
 export default function OrderReceipt({
+  cashier,
   orderNumber,
   paymentType,
   items,
@@ -66,26 +67,32 @@ export default function OrderReceipt({
 
           {/* PREVIEW PRODUCT */}
           <div className="space-y-2 py-3">
-            {validItems.length === 0 && (
+            {validItems.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-4">
                 Belum ada produk dipilih
               </p>
-            )}
-            {validItems.map((item) => (
-              <div key={item.id} className="flex justify-between text-sm">
-                <div>
-                  <p className="text-gray-800">{item.productName}</p>
-                  <p className="text-xs text-gray-500">
-                    {item.quantity} x {formatPrice(item.price)}
-                  </p>
+            ) : (
+              <>
+                <div className="flex justify-between mb-3">
+                  <p>Kasir</p>
+                  <p>{cashier}</p>
                 </div>
-                <span className="font-mono text-gray-800">
-                  {formatPrice(item.price * item.quantity)}
-                </span>
-              </div>
-            ))}
+                {validItems.map((item) => (
+                  <div key={item.id} className="flex justify-between text-sm">
+                    <div>
+                      <p className="text-gray-800">{item.productName}</p>
+                      <p className="text-xs text-gray-500">
+                        {item.quantity} x {formatPrice(item.price)}
+                      </p>
+                    </div>
+                    <span className="font-mono text-gray-800">
+                      {formatPrice(item.price * item.quantity)}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
-
           <div className="border-t border-dashed border-gray-300" />
 
           {/* TOTAL INCLUDE TAX */}
@@ -134,6 +141,12 @@ export default function OrderReceipt({
         <h2 className="text-center font-bold">{businessName}</h2>
         <p className="text-center text-xs">Order #{orderNumber}</p>
         <div className="border-t border-dashed border-black my-2" />
+        {validItems.length > 0 && (
+          <div className="flex justify-between text-xs mb-2">
+            <span>Kasir</span>
+            <span>{cashier}</span>
+          </div>
+        )}
         {validItems.map((item) => (
           <div key={item.id} className="mb-1">
             <p>{item.productName}</p>
