@@ -29,6 +29,7 @@ import {
   RiBarChartBoxFill,
   RiIdCardFill,
   RiSettings3Fill,
+  RiStore2Line,
 } from "@remixicon/react";
 import { Show, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { OriginButton } from "../ui/origin-button";
@@ -53,6 +54,12 @@ const navMenus: NavCategory[] = [
         label: "Dashboard",
         href: "/dashboard",
         icon: RiDashboardLine,
+        activeIcon: RiDashboardFill,
+      },
+      {
+        label: "Profil UMKM",
+        href: "/profileUmkm",
+        icon: RiStore2Line,
         activeIcon: RiDashboardFill,
       },
     ],
