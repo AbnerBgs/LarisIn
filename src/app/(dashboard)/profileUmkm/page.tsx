@@ -207,7 +207,7 @@ export default function EditProfile({
                 </label>
                 <fieldset className="space-y-3">
                   <legend className="text-sm font-medium text-slate-600">
-                    Alamat usaha
+                    Alamat
                   </legend>
                   <label className="block text-sm text-slate-600">
                     Jalan
@@ -291,7 +291,7 @@ export default function EditProfile({
                   />
                 </label>
                 <label className="block text-sm text-slate-600">
-                  Deskripsi usaha
+                  Deskripsi
                   <textarea
                     rows={4}
                     value={draftDescription}
