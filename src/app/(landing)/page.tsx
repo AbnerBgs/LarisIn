@@ -52,7 +52,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-10 items-center justify-center w-full lg:min-h-[calc(100vh-5rem)]">
             {/* Left Text */}
             <div className="lg:col-span-7 flex flex-col items-center text-center lg:items-start lg:text-left space-y-4 sm:space-y-5">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
                 Pusat Kendali Digital
                 <br className="hidden sm:block" /> untuk Pertumbuhan{" "}
                 <span className="text-[#0D47A1]">UMKM.</span>
