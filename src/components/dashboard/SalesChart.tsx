@@ -33,6 +33,10 @@ interface Stats {
   growth: number;
 }
 
+interface SalesChartProps {
+  month?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Data dummy
 // ---------------------------------------------------------------------------
@@ -237,7 +241,7 @@ function PeriodDropdown({ value, onChange }: PeriodDropdownProps) {
 // ---------------------------------------------------------------------------
 // Komponen utama
 // ---------------------------------------------------------------------------
-export default function SalesChart() {
+export default function SalesChart({ month = "Agustus" }: SalesChartProps) {
   const [period, setPeriod] = useState<PeriodKey>('30d');
 
   const data = useMemo<DataPoint[]>(
@@ -263,7 +267,9 @@ export default function SalesChart() {
       <div className="flex flex-wrap items-start justify-between gap-4 mb-1">
         <div>
           <PeriodDropdown value={period} onChange={setPeriod} />
-          <p className="mt-2.5 text-xs uppercase tracking-wide text-slate-400">Total penjualan</p>
+          <p className="mt-2.5 text-xs uppercase tracking-wide text-slate-400">
+            Total penjualan ({month})
+          </p>
           <p className="font-mono text-2xl sm:text-3xl font-semibold text-slate-900 tabular-nums">
             {formatFull(stats.total)}
           </p>

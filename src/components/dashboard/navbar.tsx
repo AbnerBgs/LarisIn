@@ -125,12 +125,6 @@ const navMenus: NavCategory[] = [
     label: "Sistem",
     navItems: [
       {
-        label: "Profile Usaha",
-        href: "/profile",
-        icon: RiIdCardLine,
-        activeIcon: RiIdCardFill,
-      },
-      {
         label: "Pengaturan",
         href: "/settings",
         icon: RiSettings3Line,
