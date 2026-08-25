@@ -1,11 +1,8 @@
 import SalesChart from "@/components/dashboard/SalesChart";
 import PleaseReveal from "@/components/ui/please-reveal";
 import {
-  RiSearchLine,
-  RiArrowDownSLine,
   RiArrowRightLine,
   RiArrowRightUpLine,
-  RiArrowRightUpBoxLine,
   RemixiconComponentType,
   RiCurrencyLine,
   RiMoneyDollarCircleLine,
@@ -48,19 +45,14 @@ const stats: StatCard[] = [
   },
 ];
 
-const topSales = [
-  { name: "Nasi Goreng", value: 1240 },
-  { name: "Mie Ayam", value: 980 },
-  { name: "Sate Ayam", value: 870 },
-  { name: "Rendang", value: 870 },
-  { name: "Bakso", value: 680 },
-  { name: "Es Teh Manis", value: 620 },
-  { name: "Ayam Geprek", value: 540 },
-];
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
+  const resolvedParams = await searchParams;
+  const currentMonth = resolvedParams?.month || "Agustus";
 
-const maxSales = Math.max(...topSales.map((item) => item.value));
-
-export default async function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <section className="mx-auto max-w-6xl px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">
@@ -69,9 +61,10 @@ export default async function Dashboard() {
             <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
               RINGKASAN
             </h1>
+            {/* 3. Tampilkan bulan secara dinamis di deskripsi */}
             <p className="mt-1 text-sm text-gray-500">
-              Berikut adalah ringkasan data secara keseluruhan selama satu
-              bulan.
+              Berikut adalah ringkasan data secara keseluruhan untuk bulan{" "}
+              <span className="font-semibold text-gray-800">{currentMonth}</span>.
             </p>
 
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -113,10 +106,10 @@ export default async function Dashboard() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold text-gray-900 md:text-xl">
-                  PENJUALAN TERATAS
+                  TOTAL PENJUALAN
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  Berikut adalah barang yang paling laris.
+                  Berikut adalah Statistik Penjualan.
                 </p>
               </div>
               <button
@@ -130,12 +123,13 @@ export default async function Dashboard() {
 
             <div className="mt-4 rounded-xl border border-gray-200 bg-white p-5 md:p-6">
               <h3 className="text-sm font-semibold text-gray-900">
-                Penjualan Teratas
+                Data Penjualan Teratas ({currentMonth})
               </h3>
               <p className="text-xs text-gray-500">
                 Total unit terjual per item
               </p>
-              <SalesChart />
+              {/*  Tampilkan chart penjualan dengan bulan yang dipilih */}
+              <SalesChart month={currentMonth} />
             </div>
           </div>
         </PleaseReveal>
