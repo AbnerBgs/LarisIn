@@ -52,16 +52,15 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-10 items-center justify-center w-full lg:min-h-[calc(100vh-5rem)]">
             {/* Left Text */}
             <div className="lg:col-span-7 flex flex-col items-center text-center lg:items-start lg:text-left space-y-4 sm:space-y-5">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-                Temukan UMKM sekitar,
-                <br className="hidden sm:block" />{" "}
-                bantu usahamu makin{" "}
-                <span className="text-[#0D47A1]">laris.</span>
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+                Pusat Kendali Digital
+                <br className="hidden sm:block" /> untuk Pertumbuhan{" "}
+                <span className="text-[#0D47A1]">UMKM.</span>
               </h1>
 
               <p className="text-slate-600 text-sm sm:text-base md:text-lg leading-relaxed max-w-md lg:max-w-lg">
-                Cari produk lokal, cek info lowongan kerja, atau kelola pencatatan
-                penjualan tokomu di satu tempat.
+                Satu dashboard intuitif untuk mencatat setiap transaksi,
+                mengelola stok, dan melihat perkembangan tokomu.
               </p>
 
               <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 pt-2">
@@ -176,7 +175,10 @@ export default function LandingPage() {
                     </h3>
                     <ul className="space-y-3">
                       {col.steps.map((step, i) => (
-                        <li key={step} className="flex items-start gap-3 text-sm text-slate-600">
+                        <li
+                          key={step}
+                          className="flex items-start gap-3 text-sm text-slate-600"
+                        >
                           <span className="flex-shrink-0 h-5 w-5 rounded-full bg-indigo-400 text-white font-mono text-[11px] flex items-center justify-center mt-0.5">
                             {i + 1}
                           </span>
@@ -193,38 +195,37 @@ export default function LandingPage() {
       </PleaseReveal>
 
       {/* 4. CTA BANNER SECTION */}
-        <section className="px-6 py-14 w-full border-t border-slate-200 bg-sky-600">
-          <PleaseReveal>
-            <div className="max-w-6xl mx-auto text-white rounded-2xl p-8 text-center space-y-4 min-h-100 content-center">
-              <h2 className="text-5xl font-bold text-amber-300">
-                Punya UMKM?<br/>
-                Daftarkan sekarang, Gratis
-              </h2>
-              <p className="text-md max-w-md mx-auto">
-                Perluas jangkauan usahamu dan kelola pencatatan penjualan dengan
-                lebih gampang.
-              </p>
-              <div className="pt-2">
-                <Show when="signed-out">
-                  <SignUpButton>
-                    <OriginButton className="bg-amber-300  text-black font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all hard-shadow">
-                      Daftar Gratis
-                    </OriginButton>
-                  </SignUpButton>
-                </Show>
-                <Show when="signed-in">
-                  <Link
-                    href="/dashboard"
-                  >
-                    <OriginButton className="bg-amber-300 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hard-shadow inline-flex">
-                      Lanjut ke Dashboard <RiArrowRightLine className="h-4 w-4" />
-                    </OriginButton>
-                  </Link>
-                </Show>
-              </div>
+      <section className="px-6 py-14 w-full border-t border-slate-200 bg-sky-600">
+        <PleaseReveal>
+          <div className="max-w-6xl mx-auto text-white rounded-2xl p-8 text-center space-y-4 min-h-100 content-center">
+            <h2 className="text-5xl font-bold text-amber-300">
+              Punya UMKM?
+              <br />
+              Daftarkan sekarang, Gratis
+            </h2>
+            <p className="text-md max-w-md mx-auto">
+              Perluas jangkauan usahamu dan kelola pencatatan penjualan dengan
+              lebih gampang.
+            </p>
+            <div className="pt-2">
+              <Show when="signed-out">
+                <SignUpButton>
+                  <OriginButton className="bg-amber-300  text-black font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer transition-all hard-shadow">
+                    Daftar Gratis
+                  </OriginButton>
+                </SignUpButton>
+              </Show>
+              <Show when="signed-in">
+                <Link href="/dashboard">
+                  <OriginButton className="bg-amber-300 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hard-shadow inline-flex">
+                    Lanjut ke Dashboard <RiArrowRightLine className="h-4 w-4" />
+                  </OriginButton>
+                </Link>
+              </Show>
             </div>
-          </PleaseReveal>
-        </section>
+          </div>
+        </PleaseReveal>
+      </section>
     </div>
   );
 }
