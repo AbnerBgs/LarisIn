@@ -21,7 +21,7 @@ export default function NavbarLanding() {
 
   const navLinks = [
     { href: "/", label: "Beranda" },
-    { href: "/umkm", label: "Cek UMKM" },
+    { href: "/cek-umkm", label: "Cek UMKM" },
     { href: "/dashboard", label: "Dashboard" },
     { href: "/help", label: "Panduan" },
   ];

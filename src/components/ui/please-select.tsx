@@ -55,7 +55,7 @@ export default function PleaseSelect({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-black hard-shadow bg-white py-2 max-h-60 overflow-y-auto shadow-lg">
+        <div className="absolute z-50 mt-2 w-full rounded-xl border border-black hard-shadow-static bg-white py-2 max-h-60 overflow-y-auto shadow-lg">
           {options.length === 0 ? (
             <div className="px-4 py-3 text-sm text-gray-400 text-center">
               Tidak ada data
