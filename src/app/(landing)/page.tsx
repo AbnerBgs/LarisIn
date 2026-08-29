@@ -64,11 +64,19 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 pt-2">
-                <Link href="/cek-umkm" className="w-full sm:w-auto">
+                {/* <Link href="/cek-umkm" className="w-full sm:w-auto">
                   <OriginButton className="w-full sm:w-auto bg-blue-400 font-medium text-sm sm:text-base h-12 px-4 sm:px-5 cursor-pointer hard-shadow">
                     Jelajahi UMKM
                   </OriginButton>
-                </Link>
+                </Link> */}
+                <OriginButton
+                  className="w-full sm:w-auto bg-blue-400 border border-black hover:text-white font-medium text-sm sm:text-base h-12 px-4 sm:px-5 cursor-pointer hard-shadow"
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = "/cek-umkm";
+                    link.click();
+                  }}
+                >Jelajahi UMKM</OriginButton>
                 <OriginButton
                   className="w-full sm:w-auto bg-amber-300 border border-black hover:text-white font-medium text-sm sm:text-base h-12 px-4 sm:px-5 cursor-pointer hard-shadow"
                   onClick={() => {
