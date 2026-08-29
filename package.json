@@ -13,6 +13,7 @@
   "dependencies": {
     "@clerk/nextjs": "^7.8.0",
     "@clerk/ui": "^1.30.6",
+    "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@prisma/orm-postgres": "^8.0.0-rc.8",
     "@remixicon/react": "^4.9.0",
@@ -31,12 +32,12 @@
   "devDependencies": {
     "@prisma/cli-engine": "^0.2.3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.19.43",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
-    "prisma": "^8.0.0-rc.12",
+    "prisma": "^7.10.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
     "typescript": "^5.9.3"
