@@ -127,7 +127,7 @@ export default function OrdersPage() {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="flex items-center gap-1.5 bg-red-500 cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition print:hidden"
+                  className="flex items-center gap-1.5 bg-red-500 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition print:hidden"
                 >
                   <RiRefreshLine size={14} />
                   Reset
