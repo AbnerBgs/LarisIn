@@ -49,7 +49,7 @@ interface NavItem {
 
 const navMenus: NavCategory[] = [
   {
-    label: "Utama",
+    label: "",
     navItems: [
       {
         label: "Dashboard",
@@ -63,34 +63,12 @@ const navMenus: NavCategory[] = [
         icon: RiStore2Line,
         activeIcon: RiStore2Fill,
       },
-    ],
-  },
-  {
-    label: "Inventory",
-    navItems: [
       {
         label: "Produk",
         href: "/product",
         icon: RiBox3Line,
         activeIcon: RiBox3Fill,
       },
-      // {
-      //   label: 'Scan Barcode',
-      //   href: '/scan',
-      //   icon: RiBarcodeBoxLine,
-      //   activeIcon: RiBarcodeBoxFill,
-      // },
-      {
-        label: "Stok",
-        href: "/stock",
-        icon: RiStackLine,
-        activeIcon: RiStackFill,
-      },
-    ],
-  },
-  {
-    label: "Penjualan",
-    navItems: [
       {
         label: "Kasir",
         href: "/orders",
@@ -103,33 +81,11 @@ const navMenus: NavCategory[] = [
         icon: RiShoppingCartLine,
         activeIcon: RiShoppingCartFill,
       },
-    ],
-  },
-  {
-    label: "Bisnis",
-    navItems: [
       {
         label: "Keuangan",
         href: "/finance",
         icon: RiMoneyDollarCircleLine,
         activeIcon: RiMoneyDollarCircleFill,
-      },
-      {
-        label: "Analytics",
-        href: "/analytics",
-        icon: RiBarChartBoxLine,
-        activeIcon: RiBarChartBoxFill,
-      },
-    ],
-  },
-  {
-    label: "Sistem",
-    navItems: [
-      {
-        label: "Pengaturan",
-        href: "/settings",
-        icon: RiSettings3Line,
-        activeIcon: RiSettings3Fill,
       },
     ],
   },
@@ -179,6 +135,7 @@ export default function Navbar() {
             LarisIn
           </Link>
         </div>
+        
 
         {/* Buat Baru */}
         <div className="px-4 pt-4">
