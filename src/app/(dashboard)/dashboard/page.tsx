@@ -1,4 +1,4 @@
-import SalesChart from "@/components/dashboard/SalesChart";
+import SalesChart from "@/components/dashboard/sales-chart";
 import PleaseReveal from "@/components/ui/please-reveal";
 import {
   RiArrowRightLine,
