@@ -1,10 +1,10 @@
 "use client";
 
 // Dialog "Buat Baru" — tombol serbaguna untuk menambah produk atau transaksi.
-// Memakai PleasePop dan memakai ulang TransactionForm (sama dengan
-// AddTransactionDialog) agar alur pendapatan/pengeluaran konsisten.
+// Memakai PleasePop dan memakai ulang TransactionForm
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   RiArrowDownCircleLine,
   RiArrowLeftLine,
@@ -37,17 +37,19 @@ const PRODUCT_CATEGORIES = [
   "Lainnya",
 ] as const;
 
+export interface CreateNewDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSaveTransaction?: (input: NewFinanceTransaction) => void;
+  onSaveProduct?: (input: NewProductInput) => void;
+}
+
 export default function CreateNewDialog({
   open,
   onClose,
   onSaveTransaction,
   onSaveProduct,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSaveTransaction: (input: NewFinanceTransaction) => void;
-  onSaveProduct: (input: NewProductInput) => void;
-}) {
+}: CreateNewDialogProps) {
   const [step, setStep] = useState<Step>("choose");
   const [type, setType] = useState<TransactionType>("income");
 
@@ -142,16 +144,12 @@ export default function CreateNewDialog({
           type={type}
           onBack={backToChoose}
           onCancel={onClose}
-          onSave={onSaveTransaction}
+          onSave={onSaveTransaction ?? (() => {})}
         />
       )}
     </PleasePop>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* Formulir produk baru                                                */
-/* ------------------------------------------------------------------ */
 
 interface ProductFormValues {
   name: string;
@@ -175,8 +173,10 @@ function ProductForm({
 }: {
   onBack: () => void;
   onCancel: () => void;
-  onSave: (input: NewProductInput) => void;
+  onSave?: (input: NewProductInput) => void;
 }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [values, setValues] = useState<ProductFormValues>({
     name: "",
     price: "",
@@ -217,17 +217,54 @@ function ProductForm({
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    onSave({
+    const payload: NewProductInput = {
       name: values.name.trim(),
       price: Math.round(Number(values.price)),
       category: values.category,
       stock: Math.round(Number(values.stock)),
       description: values.description.trim() || undefined,
-    });
+    };
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nama: payload.name,
+          harga: payload.price,
+          deskripsi: payload.description,
+          kategori: payload.category, // Kirim nama kategori untuk dicari ID-nya di backend
+          gambarUrl: "https://picsum.photos/200/300",
+        }),
+      });
+
+      const resData = await response.json();
+
+      if (!response.ok) {
+        // Tampilkan error spesifik dari server jika gagal
+        console.error("Server Error Response:", resData);
+        alert(`Gagal menyimpan: ${resData.details || resData.error || "Server Error"}`);
+        return;
+      }
+
+      if (onSave) {
+        onSave(payload);
+      }
+
+      router.refresh();
+      onCancel();
+    } catch (err) {
+      console.error("Fetch Exception:", err);
+      alert("Tidak dapat terhubung ke Server API.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -362,7 +399,6 @@ function ProductForm({
         </div>
       </div>
 
-      {/* Aksi */}
       <div className="mt-6 flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
         <button
           type="button"
@@ -376,15 +412,17 @@ function ProductForm({
           <button
             type="button"
             onClick={onCancel}
-            className="cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            disabled={loading}
+            className="cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
           >
             Batal
           </button>
           <button
             type="submit"
-            className="cursor-pointer rounded-xl border border-black bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 hard-shadow"
+            disabled={loading}
+            className="cursor-pointer rounded-xl border border-black bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 hard-shadow disabled:opacity-50"
           >
-            Simpan Produk
+            {loading ? "Menyimpan..." : "Simpan Produk"}
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ElementType } from "react";
+import { useMemo, useState, useEffect, type ElementType } from "react";
 import { OriginButton } from "@/components/ui/origin-button";
 import PleasePop from "@/components/ui/please-pop";
 import PleaseReveal from "@/components/ui/please-reveal";
@@ -20,17 +20,20 @@ import {
   RiTShirtLine,
   RiUserLocationLine,
   RiWhatsappLine,
+  RiAddCircleLine,
 } from "@remixicon/react";
 
 /* ------------------------------------------------------------------ */
-/* Tipe & data contoh — nanti diganti data asli dari Prisma            */
+/* Tipe Data                                                          */
 /* ------------------------------------------------------------------ */
 
 type CategoryKey = "kuliner" | "fashion" | "kerajinan" | "jasa" | "pertanian";
 
 interface CatalogProduct {
+  id?: string;
   name: string;
   price: number;
+  imageUrl?: string;
 }
 
 interface JobPosting {
@@ -39,7 +42,7 @@ interface JobPosting {
   salary: string;
 }
 
-interface Umkm {
+export interface Umkm {
   id: string;
   name: string;
   category: CategoryKey;
@@ -64,215 +67,6 @@ const CATEGORY_META: Record<
   pertanian: { label: "Pertanian", code: "AGR", icon: RiSeedlingLine },
 };
 
-const UMKM_LIST: Umkm[] = [
-  {
-    id: "umkm-001",
-    name: "Warung Kopi Bu Slamet",
-    category: "kuliner",
-    city: "Yogyakarta",
-    area: "Sleman, Yogyakarta",
-    rating: 4.8,
-    openHours: "07.00 – 21.00",
-    whatsapp: "6281234567801",
-    description:
-      "Kopi lokal racikan sendiri plus gorengan hangat. Tempat nongkrong warga Sleman sejak 2015.",
-    products: [
-      { name: "Kopi Susu Gula Aren", price: 15000 },
-      { name: "Es Kopi Kekinian", price: 18000 },
-      { name: "Gorengan Bakwan (5 pcs)", price: 10000 },
-    ],
-    jobs: [
-      {
-        title: "Barista Part-time",
-        type: "Part-time",
-        salary: "Rp1,5–2 jt/bulan",
-      },
-    ],
-  },
-  {
-    id: "umkm-002",
-    name: "Batik Tulis Cantingku",
-    category: "fashion",
-    city: "Surakarta",
-    area: "Laweyan, Surakarta",
-    rating: 4.9,
-    openHours: "09.00 – 17.00",
-    whatsapp: "6281234567802",
-    description:
-      "Batik tulis asli Laweyan dengan pewarna alami. Tersedia kemeja, dress, dan selendang premium.",
-    products: [
-      { name: "Kemeja Batik Tulis", price: 350000 },
-      { name: "Dress Batik", price: 425000 },
-      { name: "Selendang Sutra", price: 180000 },
-    ],
-    jobs: [
-      { title: "Penjahit", type: "Full-time", salary: "Rp2–3 jt/bulan" },
-      {
-        title: "Admin Media Sosial",
-        type: "Part-time",
-        salary: "Rp1–1,5 jt/bulan",
-      },
-    ],
-  },
-  {
-    id: "umkm-003",
-    name: "Keripik Singkong Nusantara",
-    category: "kuliner",
-    city: "Bandung",
-    area: "Cibaduyut, Bandung",
-    rating: 4.6,
-    openHours: "08.00 – 18.00",
-    whatsapp: "6281234567803",
-    description:
-      "Oleh-oleh khas Bandung: keripik singkong renyah dengan berbagai varian rasa, dari balado sampai keju.",
-    products: [
-      { name: "Keripik Singkong Balado", price: 15000 },
-      { name: "Keripik Singkong Original", price: 12000 },
-      { name: "Opak Singkong", price: 18000 },
-    ],
-    jobs: [
-      {
-        title: "Operator Produksi",
-        type: "Full-time",
-        salary: "Rp2–2,5 jt/bulan",
-      },
-    ],
-  },
-  {
-    id: "umkm-004",
-    name: "Studio Foto Klasik",
-    category: "jasa",
-    city: "Malang",
-    area: "Klojen, Malang",
-    rating: 4.7,
-    openHours: "09.00 – 20.00",
-    whatsapp: "6281234567804",
-    description:
-      "Jasa foto keluarga, wisuda, dan cetak foto instan. Hasil rapi dengan harga bersahabat.",
-    products: [
-      { name: "Paket Foto Keluarga", price: 250000 },
-      { name: "Paket Foto Wisuda", price: 150000 },
-      { name: "Cetak Foto 4R", price: 15000 },
-    ],
-    jobs: [],
-  },
-  {
-    id: "umkm-005",
-    name: "Kebun Tanaman Hias Lestari",
-    category: "pertanian",
-    city: "Bogor",
-    area: "Ciawi, Bogor",
-    rating: 4.5,
-    openHours: "07.00 – 17.00",
-    whatsapp: "6281234567805",
-    description:
-      "Pusat tanaman hias dan perlengkapan berkebun. Konsultasi gratis untuk pemula.",
-    products: [
-      { name: "Monstera Deliciosa", price: 75000 },
-      { name: "Kaktus Mini", price: 25000 },
-      { name: "Paket Pupuk Organik", price: 45000 },
-    ],
-    jobs: [
-      {
-        title: "Perawat Tanaman",
-        type: "Part-time",
-        salary: "Rp1–1,5 jt/bulan",
-      },
-    ],
-  },
-  {
-    id: "umkm-006",
-    name: "Kerajinan Rotan Mangrove",
-    category: "kerajinan",
-    city: "Banjarmasin",
-    area: "Banjarmasin Utara, Kalimantan Selatan",
-    rating: 4.8,
-    openHours: "08.00 – 17.00",
-    whatsapp: "6281234567806",
-    description:
-      "Kerajinan rotan ramah lingkungan buatan pengrajin lokal Banjarmasin. Tas, keranjang, hingga lampu hias.",
-    products: [
-      { name: "Tas Rotan Premium", price: 250000 },
-      { name: "Keranjang Rotan", price: 120000 },
-      { name: "Lampu Rotan", price: 300000 },
-    ],
-    jobs: [
-      {
-        title: "Penganyam Rotan",
-        type: "Full-time",
-        salary: "Rp2–3 jt/bulan",
-      },
-      {
-        title: "Admin Marketplace",
-        type: "Part-time",
-        salary: "Rp1–1,5 jt/bulan",
-      },
-    ],
-  },
-  {
-    id: "umkm-007",
-    name: "Konveksi Kaos Lokal",
-    category: "fashion",
-    city: "Bandung",
-    area: "Kiaracondong, Bandung",
-    rating: 4.4,
-    openHours: "08.00 – 19.00",
-    whatsapp: "6281234567807",
-    description:
-      "Produksi kaos polos, kaos sablon custom, dan hoodie. Menerima partai kecil untuk komunitas.",
-    products: [
-      { name: "Kaos Polos Katun", price: 35000 },
-      { name: "Kaos Sablon Custom", price: 65000 },
-      { name: "Hoodie Fleece", price: 145000 },
-    ],
-    jobs: [
-      {
-        title: "Operator Sablon",
-        type: "Full-time",
-        salary: "Rp2,5–3 jt/bulan",
-      },
-    ],
-  },
-  {
-    id: "umkm-008",
-    name: "Bengkel Motor Barokah",
-    category: "jasa",
-    city: "Surabaya",
-    area: "Wonokromo, Surabaya",
-    rating: 4.3,
-    openHours: "24 Jam",
-    whatsapp: "6281234567808",
-    description:
-      "Servis motor cepat dan transparan, buka 24 jam. Sparepart asli bergaransi 3 bulan.",
-    products: [
-      { name: "Ganti Oli + Tune Up", price: 85000 },
-      { name: "Servis CVT", price: 120000 },
-      { name: "Ban Tubeless", price: 95000 },
-    ],
-    jobs: [
-      { title: "Mekanik", type: "Full-time", salary: "Rp2,5–3,5 jt/bulan" },
-    ],
-  },
-  {
-    id: "umkm-009",
-    name: "Sayur Organik Lembang",
-    category: "pertanian",
-    city: "Lembang",
-    area: "Lembang, Bandung Barat",
-    rating: 4.7,
-    openHours: "06.00 – 15.00",
-    whatsapp: "6281234567809",
-    description:
-      "Sayur organik panen pagi, dikirim hari itu juga. Langganan mingguan tersedia untuk wilayah Bandung.",
-    products: [
-      { name: "Paket Sayur Organik", price: 30000 },
-      { name: "Selada Hidroponik", price: 12000 },
-      { name: "Telur Ayam Kampung (10 btr)", price: 45000 },
-    ],
-    jobs: [],
-  },
-];
-
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -281,7 +75,7 @@ const formatPrice = (price: number) =>
   }).format(price);
 
 /* ------------------------------------------------------------------ */
-/* Kartu UMKM                                                          */
+/* Komponen Kartu UMKM                                                */
 /* ------------------------------------------------------------------ */
 
 function UmkmCard({
@@ -293,7 +87,7 @@ function UmkmCard({
   index: number;
   onDetail: (umkm: Umkm) => void;
 }) {
-  const meta = CATEGORY_META[umkm.category];
+  const meta = CATEGORY_META[umkm.category] || CATEGORY_META["jasa"];
   const Icon = meta.icon;
 
   return (
@@ -305,7 +99,7 @@ function UmkmCard({
         </span>
         <span className="flex items-center gap-1 text-xs font-mono bg-orange-300/25 text-[#1c1b17] font-semibold px-2 py-1 rounded border border-black/20">
           <RiStarFill className="h-3 w-3 text-orange-300" />
-          {umkm.rating.toFixed(1)}
+          {(umkm.rating || 5.0).toFixed(1)}
         </span>
       </div>
 
@@ -319,7 +113,7 @@ function UmkmCard({
         </div>
         <p className="flex items-center gap-1 text-xs text-slate-500 mt-2">
           <RiMapPin2Line className="h-3.5 w-3.5 shrink-0" />
-          {meta.label} · {umkm.area}
+          {meta.label} · {umkm.area || umkm.city}
         </p>
         <p className="text-sm text-slate-600 leading-relaxed mt-3 line-clamp-2">
           {umkm.description}
@@ -328,15 +122,16 @@ function UmkmCard({
         <div className="mt-4 pt-3 border-t border-dashed border-black/30 flex flex-col font-mono text-xs gap-1">
           <span className="flex items-center gap-1.5 text-slate-600">
             <RiShoppingBagLine className="h-3.5 w-3.5" />
-            {umkm.products.length} produk
+            {umkm.products?.length || 0} produk
           </span>
           <span className="flex items-center gap-1.5 text-indigo-500 font-semibold">
             <RiBriefcaseLine className="h-3.5 w-3.5" />
-            {umkm.jobs.length} lowongan kerja
+            {umkm.jobs?.length || 0} lowongan kerja
           </span>
+          {/* 👈 Tampilan jam buka dinamis di Kartu */}
           <span className="flex items-center gap-1.5 text-slate-600">
-            <RiTimeLine className="h-3.5 w-3.5" />
-            {umkm.openHours}
+            <RiTimeLine className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            {umkm.openHours || "Belum diatur"}
           </span>
         </div>
       </div>
@@ -364,50 +159,123 @@ function UmkmCard({
 }
 
 /* ------------------------------------------------------------------ */
-/* Halaman Cek UMKM                                                    */
+/* Halaman Utama Cek UMKM                                             */
 /* ------------------------------------------------------------------ */
 
 export default function CekUmkmPage() {
+  const [umkmList, setUmkmList] = useState<Umkm[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryKey | "semua">("semua");
   const [city, setCity] = useState("semua");
   const [selected, setSelected] = useState<Umkm | null>(null);
 
+  useEffect(() => {
+    async function fetchUmkmData() {
+      try {
+        const resProfile = await fetch("/api/profileUmkm");
+        let profileData = null;
+        if (resProfile.ok) {
+          profileData = await resProfile.json();
+        }
+
+        let productsData: CatalogProduct[] = [];
+        try {
+          const resProducts = await fetch("/api/product");
+          if (resProducts.ok) {
+            const rawProducts = await resProducts.json();
+
+            const list = Array.isArray(rawProducts)
+              ? rawProducts
+              : rawProducts.data || rawProducts.products || [];
+
+            productsData = list.map((p: any) => ({
+              id: p.id || p._id,
+              name: p.nama || p.name || "Tanpa Nama",
+              price: Number(p.harga || p.price || 0),
+              imageUrl: p.gambarUrl || p.image || p.imageUrl || "",
+            }));
+          }
+        } catch (pErr) {
+          console.error("Gagal mengambil produk:", pErr);
+        }
+
+        if (profileData) {
+          const parsedJobs: JobPosting[] = profileData.jobsText
+            ? profileData.jobsText
+                .split("\n")
+                .filter((line: string) => line.trim() !== "")
+                .map((line: string) => ({
+                  title: line.trim(),
+                  type: "Penuh Waktu",
+                  salary: "Kompetitif",
+                }))
+            : [];
+
+          const formattedData: Umkm = {
+            id: profileData.id || "umkm-1",
+            name: profileData.name || profileData.namaUsaha || "Nama Usaha",
+            category: (profileData.category as CategoryKey) || "jasa",
+            city: profileData.city || "Kota Tidak Diketahui",
+            area:
+              [profileData.street, profileData.district]
+                .filter(Boolean)
+                .join(", ") || profileData.city,
+            rating: 5.0,
+            // 👈 Membaca openHours asli dari profil data (tanpa fallback "08.00 - 17.00")
+            openHours: profileData.openHours || "",
+            whatsapp: profileData.whatsapp || "6281234567890",
+            description: profileData.description || "",
+            products: productsData,
+            jobs: parsedJobs,
+          };
+
+          setUmkmList([formattedData]);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data UMKM dari DB", err);
+      }
+    }
+
+    fetchUmkmData();
+  }, []);
+
   const cityOptions = useMemo(
     () => [
       { value: "semua", label: "Semua Kota" },
-      ...Array.from(new Set(UMKM_LIST.map((u) => u.city)))
+      ...Array.from(new Set(umkmList.map((u) => u.city)))
+        .filter(Boolean)
         .sort()
         .map((c) => ({ value: c, label: c })),
     ],
-    [],
+    [umkmList]
   );
 
   const stats = useMemo(
     () => ({
-      total: UMKM_LIST.length,
+      total: umkmList.length,
       categories: Object.keys(CATEGORY_META).length,
-      products: UMKM_LIST.reduce((sum, u) => sum + u.products.length, 0),
-      jobs: UMKM_LIST.reduce((sum, u) => sum + u.jobs.length, 0),
+      products: umkmList.reduce((sum, u) => sum + (u.products?.length || 0), 0),
+      jobs: umkmList.reduce((sum, u) => sum + (u.jobs?.length || 0), 0),
     }),
-    [],
+    [umkmList]
   );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return UMKM_LIST.filter((u) => {
+    return umkmList.filter((u) => {
       const matchCategory =
         category === "semua" || u.category === category;
       const matchCity = city === "semua" || u.city === city;
+      const metaLabel = CATEGORY_META[u.category]?.label || "";
       const matchQuery =
         !q ||
-        [u.name, u.area, u.city, u.description, CATEGORY_META[u.category].label]
+        [u.name, u.area, u.city, u.description, metaLabel]
           .join(" ")
           .toLowerCase()
           .includes(q);
       return matchCategory && matchCity && matchQuery;
     });
-  }, [query, category, city]);
+  }, [query, category, city, umkmList]);
 
   const hasActiveFilter =
     query.trim() !== "" || category !== "semua" || city !== "semua";
@@ -523,7 +391,7 @@ export default function CekUmkmPage() {
           <div>
             <div className="flex items-center justify-between pt-10 pb-6">
               <p className="font-mono text-xs tracking-widest uppercase text-slate-500">
-                Menampilkan {filtered.length} dari {UMKM_LIST.length} UMKM
+                Menampilkan {filtered.length} dari {umkmList.length} UMKM
               </p>
               {hasActiveFilter && (
                 <button
@@ -538,7 +406,7 @@ export default function CekUmkmPage() {
             </div>
           </div>
 
-          {/* Grid UMKM / empty state */}
+          {/* Grid UMKM / Empty state */}
           <div>
             {filtered.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-16">
@@ -554,16 +422,27 @@ export default function CekUmkmPage() {
             ) : (
               <div className="max-w-md mx-auto text-center py-16 px-6 mb-16 bg-white border border-black rounded-2xl hard-shadow-static">
                 <RiUserLocationLine className="h-10 w-10 text-indigo-500 mx-auto" />
-                <h3 className="font-bold mt-4">UMKM tidak ditemukan</h3>
+                <h3 className="font-bold mt-4">Belum Ada Data UMKM Terdeploy</h3>
                 <p className="text-sm text-slate-600 mt-2">
-                  Coba ubah kata kunci, kategori, atau kota pencarianmu.
+                  {hasActiveFilter
+                    ? "Tidak ada UMKM yang cocok dengan filter kamu."
+                    : "Silakan isi dan simpan form Profil UMKM kamu terlebih dahulu."}
                 </p>
-                <OriginButton
-                  onClick={resetFilters}
-                  className="mt-6 bg-amber-300 font-medium text-sm h-11 px-4 cursor-pointer hard-shadow"
-                >
-                  Reset Filter
-                </OriginButton>
+                {hasActiveFilter ? (
+                  <OriginButton
+                    onClick={resetFilters}
+                    className="mt-6 bg-amber-300 font-medium text-sm h-11 px-4 cursor-pointer hard-shadow"
+                  >
+                    Reset Filter
+                  </OriginButton>
+                ) : (
+                  <a href="/dashboard" className="inline-block mt-6">
+                    <OriginButton className="bg-amber-300 font-medium text-sm h-11 px-4 cursor-pointer hard-shadow flex items-center gap-2">
+                      <RiAddCircleLine className="h-4 w-4" />
+                      Isi Profil UMKM Sekarang
+                    </OriginButton>
+                  </a>
+                )}
               </div>
             )}
           </div>
@@ -587,9 +466,7 @@ export default function CekUmkmPage() {
               <OriginButton
                 className="bg-amber-300 text-black font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hard-shadow"
                 onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = "/dashboard";
-                  link.click();
+                  window.location.href = "/dashboard";
                 }}
               >
                 Mulai Kelola Toko
@@ -610,22 +487,23 @@ export default function CekUmkmPage() {
             {/* Info dasar */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-mono text-[10px] tracking-widest uppercase text-slate-500 border border-black/30 bg-slate-50 px-2 py-0.5 rounded">
-                {CATEGORY_META[selected.category].label}
+                {CATEGORY_META[selected.category]?.label || selected.category}
               </span>
               <span className="flex items-center gap-1 text-xs font-mono bg-orange-300/25 text-[#1c1b17] font-semibold px-2 py-1 rounded border border-black/20">
                 <RiStarFill className="h-3 w-3 text-orange-300" />
-                {selected.rating.toFixed(1)}
+                {(selected.rating || 5.0).toFixed(1)}
               </span>
             </div>
 
             <div className="space-y-1.5 text-sm text-slate-600">
               <p className="flex items-center gap-2">
                 <RiMapPin2Line className="h-4 w-4 shrink-0 text-slate-400" />
-                {selected.area}
+                {selected.area || selected.city}
               </p>
+              {/* 👈 Tampilan Jam Buka Dinamis di Modal Detail */}
               <p className="flex items-center gap-2">
                 <RiTimeLine className="h-4 w-4 shrink-0 text-slate-400" />
-                Buka {selected.openHours}
+                {selected.openHours ? `Buka ${selected.openHours}` : "Jam operasional belum diisi"}
               </p>
             </div>
 
@@ -638,22 +516,41 @@ export default function CekUmkmPage() {
               <h4 className="font-mono text-[11px] uppercase tracking-widest text-indigo-500 mb-3">
                 Katalog Produk
               </h4>
-              <ul className="border border-black/20 rounded-xl divide-y divide-dashed divide-black/20 bg-slate-50">
-                {selected.products.map((p) => (
-                  <li
-                    key={p.name}
-                    className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
-                  >
-                    <span className="flex items-center gap-2 text-slate-700">
-                      <RiShoppingBagLine className="h-4 w-4 shrink-0 text-slate-400" />
-                      {p.name}
-                    </span>
-                    <span className="font-mono font-semibold text-slate-900">
-                      {formatPrice(p.price)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              {selected.products && selected.products.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1">
+                  {selected.products.map((p, idx) => (
+                    <div
+                      key={p.id || idx}
+                      className="flex items-center gap-3 p-2.5 rounded-xl border border-black/20 bg-slate-50 hover:bg-white hover:border-black transition-all"
+                    >
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-indigo-100 border border-black/10 flex items-center justify-center">
+                        {p.imageUrl ? (
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <RiShoppingBagLine className="h-5 w-5 text-indigo-500" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h5
+                          className="truncate text-xs font-bold text-slate-900"
+                          title={p.name}
+                        >
+                          {p.name}
+                        </h5>
+                        <p className="font-mono text-[11px] font-bold text-emerald-600 mt-0.5">
+                          {formatPrice(p.price)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500 italic">Belum ada produk.</p>
+              )}
             </div>
 
             {/* Lowongan kerja */}
@@ -661,28 +558,28 @@ export default function CekUmkmPage() {
               <h4 className="font-mono text-[11px] uppercase tracking-widest text-indigo-500 mb-3">
                 Lowongan Kerja
               </h4>
-              {selected.jobs.length > 0 ? (
-                <ul className="space-y-2">
-                  {selected.jobs.map((j) => (
+              {selected.jobs && selected.jobs.length > 0 ? (
+                <ul className="space-y-2 max-h-44 overflow-y-auto pr-1">
+                  {selected.jobs.map((j, idx) => (
                     <li
-                      key={j.title}
+                      key={idx}
                       className="flex items-center justify-between gap-3 border border-black/20 rounded-xl px-4 py-2.5 text-sm bg-white"
                     >
-                      <span className="flex items-center gap-2 text-slate-700">
+                      <span className="flex items-center gap-2 text-slate-700 truncate">
                         <RiBriefcaseLine className="h-4 w-4 shrink-0 text-indigo-500" />
-                        {j.title}
-                        <span className="font-mono text-[10px] uppercase tracking-widest border border-black/20 bg-slate-50 px-1.5 py-0.5 rounded">
+                        <span className="truncate font-medium">{j.title}</span>
+                        <span className="font-mono text-[10px] uppercase tracking-widest border border-black/20 bg-slate-50 px-1.5 py-0.5 rounded shrink-0">
                           {j.type}
                         </span>
                       </span>
-                      <span className="font-mono text-xs font-semibold text-indigo-600">
+                      <span className="font-mono text-xs font-semibold text-indigo-600 shrink-0">
                         {j.salary}
                       </span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-500 italic">
                   Belum ada lowongan aktif.
                 </p>
               )}
@@ -695,7 +592,7 @@ export default function CekUmkmPage() {
               rel="noopener noreferrer"
               className="block pt-1"
             >
-              <OriginButton className="w-full bg-emerald-500 text-white font-medium text-sm h-11 px-4 cursor-pointer hard-shadow">
+              <OriginButton className="w-full bg-emerald-500 text-white font-medium text-sm h-11 px-4 cursor-pointer hard-shadow flex items-center justify-center gap-2">
                 <RiWhatsappLine className="h-4 w-4" />
                 Chat via WhatsApp
               </OriginButton>
