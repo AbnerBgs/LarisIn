@@ -18,15 +18,17 @@ import {
 
 type Step = "choose" | "form";
 
+export interface AddTransactionDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (input: NewFinanceTransaction) => void;
+}
+
 export default function AddTransactionDialog({
   open,
   onClose,
   onSave,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSave: (input: NewFinanceTransaction) => void;
-}) {
+}: AddTransactionDialogProps) {
   const [step, setStep] = useState<Step>("choose");
   const [type, setType] = useState<TransactionType>("income");
 

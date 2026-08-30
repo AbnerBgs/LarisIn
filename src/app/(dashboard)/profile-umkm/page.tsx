@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, ComponentType } from "react";
 import {
+  RiBriefcaseLine,
   RiCloseLine,
   RiEditLine,
   RiFacebookCircleLine,
@@ -8,85 +9,93 @@ import {
   RiGlobalLine,
   RiInstagramLine,
   RiMapPin2Line,
+  RiWhatsappLine,
   RiSaveLine,
   RiStore2Line,
+  RiTimeLine, 
 } from "@remixicon/react";
 
-interface EditableProfileSectionProps {
-  initialName?: string;
-  initialAddress?: string;
-  initialStreet?: string;
-  initialDistrict?: string;
-  initialCity?: string;
-  initialProvince?: string;
-  initialPostalCode?: string;
-  linkInsta?: string;
-  linkFb?: string;
-  linkWeb?: string;
-  initialDescription?: string;
-  onSave?: (data: {
-    name: string;
-    address: string;
-    street: string;
-    district: string;
-    city: string;
-    province: string;
-    postalCode: string;
-    linkInsta: string;
-    linkFb: string;
-    linkWeb: string;
-    description: string;
-  }) => void;
-}
-
-export default function EditProfile({
-  initialName = "Nama Usaha",
-  initialAddress = "",
-  initialStreet = "",
-  initialDistrict = "",
-  initialCity,
-  initialProvince = "",
-  initialPostalCode = "",
-  linkInsta = "",
-  linkFb = "",
-  linkWeb = "",
-  initialDescription = "",
-  onSave,
-}: EditableProfileSectionProps) {
+export default function EditProfile() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [name, setName] = useState<string>(initialName);
-  const [street, setStreet] = useState<string>(initialStreet);
-  const [district, setDistrict] = useState<string>(initialDistrict);
-  const [city, setCity] = useState<string>(initialCity ?? initialAddress);
-  const [province, setProvince] = useState<string>(initialProvince);
-  const [postalCode, setPostalCode] = useState<string>(initialPostalCode);
-  const [insta, setInsta] = useState<string>(linkInsta);
-  const [fb, setFb] = useState<string>(linkFb);
-  const [web, setWeb] = useState<string>(linkWeb);
-  const [description, setDescription] = useState<string>(initialDescription);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const [draftName, setDraftName] = useState<string>(initialName);
-  const [draftStreet, setDraftStreet] = useState<string>(initialStreet);
-  const [draftDistrict, setDraftDistrict] = useState<string>(initialDistrict);
-  const [draftCity, setDraftCity] = useState<string>(
-    initialCity ?? initialAddress,
-  );
-  const [draftProvince, setDraftProvince] = useState<string>(initialProvince);
-  const [draftPostalCode, setDraftPostalCode] =
-    useState<string>(initialPostalCode);
-  const [draftInsta, setDraftInsta] = useState<string>(linkInsta);
-  const [draftFb, setDraftFb] = useState<string>(linkFb);
-  const [draftWeb, setDraftWeb] = useState<string>(linkWeb);
-  const [draftDescription, setDraftDescription] =
-    useState<string>(initialDescription);
+  // States Utama
+  const [name, setName] = useState<string>("Nama Usaha");
+  const [openHours, setOpenHours] = useState<string>(""); 
+  const [street, setStreet] = useState<string>("");
+  const [district, setDistrict] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [province, setProvince] = useState<string>("");
+  const [postalCode, setPostalCode] = useState<string>("");
+  const [whatsapp, setWhatsapp] = useState<string>("");
+  const [jobsText, setJobsText] = useState<string>("");
+  const [isOpeningJob, setIsOpeningJob] = useState<boolean>(false);
+  const [insta, setInsta] = useState<string>("");
+  const [fb, setFb] = useState<string>("");
+  const [web, setWeb] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+
+  // Draft States (untuk form edit)
+  const [draftName, setDraftName] = useState<string>("");
+  const [draftOpenHours, setDraftOpenHours] = useState<string>(""); 
+  const [draftStreet, setDraftStreet] = useState<string>("");
+  const [draftDistrict, setDraftDistrict] = useState<string>("");
+  const [draftCity, setDraftCity] = useState<string>("");
+  const [draftProvince, setDraftProvince] = useState<string>("");
+  const [draftPostalCode, setDraftPostalCode] = useState<string>("");
+  const [draftWhatsapp, setDraftWhatsapp] = useState<string>("");
+  const [draftJobsText, setDraftJobsText] = useState<string>("");
+  const [draftIsOpeningJob, setDraftIsOpeningJob] = useState<boolean>(false);
+  const [draftInsta, setDraftInsta] = useState<string>("");
+  const [draftFb, setDraftFb] = useState<string>("");
+  const [draftWeb, setDraftWeb] = useState<string>("");
+  const [draftDescription, setDraftDescription] = useState<string>("");
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/profileUmkm");
+        if (res.ok) {
+          const data = await res.json();
+          setName(data.name || "Nama Usaha");
+          setOpenHours(data.openHours || ""); 
+          setStreet(data.street || "");
+          setDistrict(data.district || "");
+          setCity(data.city || "");
+          setProvince(data.province || "");
+          setPostalCode(data.postalCode || "");
+          setWhatsapp(data.whatsapp || "");
+
+          const jobVal = data.jobsText || data.jobs || "";
+          setJobsText(jobVal);
+          setIsOpeningJob(Boolean(jobVal.trim()));
+
+          setInsta(data.linkInsta || "");
+          setFb(data.linkFb || "");
+          setWeb(data.linkWeb || "");
+          setDescription(data.description || "");
+        }
+      } catch (err) {
+        console.error("Gagal load profile", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProfile();
+  }, []);
 
   const startEdit = (): void => {
     setDraftName(name);
+    setDraftOpenHours(openHours); 
     setDraftStreet(street);
     setDraftDistrict(district);
     setDraftCity(city);
     setDraftProvince(province);
     setDraftPostalCode(postalCode);
+    setDraftWhatsapp(whatsapp);
+    setDraftJobsText(jobsText);
+    setDraftIsOpeningJob(isOpeningJob);
     setDraftInsta(insta);
     setDraftFb(fb);
     setDraftWeb(web);
@@ -94,56 +103,74 @@ export default function EditProfile({
     setIsEditing(true);
   };
 
-  const cancelEdit = (): void => {
-    setIsEditing(false);
+  const cancelEdit = (): void => setIsEditing(false);
+
+  const saveEdit = async (): Promise<void> => {
+    if (!draftName.trim()) {
+      alert("Nama usaha tidak boleh kosong!");
+      return;
+    }
+
+    setIsSaving(true);
+
+    const finalJobsText = draftIsOpeningJob ? draftJobsText.trim() : "";
+
+    const payload = {
+      name: draftName.trim(),
+      openHours: draftOpenHours.trim(), 
+      street: draftStreet.trim(),
+      district: draftDistrict.trim(),
+      city: draftCity.trim(),
+      province: draftProvince.trim(),
+      postalCode: draftPostalCode.trim(),
+      whatsapp: draftWhatsapp.trim(),
+      jobsText: finalJobsText,
+      linkInsta: draftInsta.trim(),
+      linkFb: draftFb.trim(),
+      linkWeb: draftWeb.trim(),
+      description: draftDescription.trim(),
+    };
+
+    try {
+      const res = await fetch("/api/profileUmkm", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        setName(payload.name);
+        setOpenHours(payload.openHours); 
+        setDistrict(payload.district);
+        setCity(payload.city);
+        setProvince(payload.province);
+        setPostalCode(payload.postalCode);
+        setWhatsapp(payload.whatsapp);
+        setJobsText(payload.jobsText);
+        setIsOpeningJob(Boolean(payload.jobsText));
+        setInsta(payload.linkInsta);
+        setFb(payload.linkFb);
+        setWeb(payload.linkWeb);
+        setDescription(payload.description);
+        setIsEditing(false);
+
+        window.dispatchEvent(
+          new CustomEvent("profile-updated", { detail: { name: payload.name } })
+        );
+      } else {
+        alert("Gagal menyimpan profil ke server.");
+      }
+    } catch (err) {
+      console.error("Gagal menyimpan profil:", err);
+      alert("Terjadi kesalahan jaringan.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const saveEdit = (): void => {
-    if (!draftName.trim()) return; // nama wajib diisi
-    const newName = draftName.trim();
-    const newStreet = draftStreet.trim();
-    const newDistrict = draftDistrict.trim();
-    const newCity = draftCity.trim();
-    const newProvince = draftProvince.trim();
-    const newPostalCode = draftPostalCode.trim();
-    const newAddress = [
-      newStreet,
-      newDistrict,
-      newCity,
-      newProvince,
-      newPostalCode,
-    ]
-      .filter(Boolean)
-      .join(", ");
-    const newInsta = draftInsta.trim();
-    const newFb = draftFb.trim();
-    const newWeb = draftWeb.trim();
-    const newDescription = draftDescription.trim();
-    setName(newName);
-    setStreet(newStreet);
-    setDistrict(newDistrict);
-    setCity(newCity);
-    setProvince(newProvince);
-    setPostalCode(newPostalCode);
-    setInsta(newInsta);
-    setFb(newFb);
-    setWeb(newWeb);
-    setDescription(newDescription);
-    setIsEditing(false);
-    onSave?.({
-      name: newName,
-      address: newAddress,
-      street: newStreet,
-      district: newDistrict,
-      city: newCity,
-      province: newProvince,
-      postalCode: newPostalCode,
-      linkInsta: newInsta,
-      linkFb: newFb,
-      linkWeb: newWeb,
-      description: newDescription,
-    });
-  };
+  if (loading) {
+    return <p className="p-8 text-sm text-gray-500">Memuat profil...</p>;
+  }
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -196,6 +223,7 @@ export default function EditProfile({
                     Edit profil usaha
                   </h3>
                 </div>
+
                 <label className="block text-sm font-medium text-slate-600">
                   Nama usaha
                   <input
@@ -205,6 +233,30 @@ export default function EditProfile({
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
                   />
                 </label>
+
+                {/* 👈 Input Jam Operasional / Jam Buka */}
+                <label className="block text-sm font-medium text-slate-600">
+                  Jam Operasional / Waktu Buka
+                  <input
+                    type="text"
+                    value={draftOpenHours}
+                    onChange={(event) => setDraftOpenHours(event.target.value)}
+                    placeholder="Contoh: 08.00 - 17.00 / 24 Jam"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </label>
+
+                <label className="block text-sm font-medium text-slate-600">
+                  Nomor WhatsApp / Telepon
+                  <input
+                    type="tel"
+                    value={draftWhatsapp}
+                    onChange={(event) => setDraftWhatsapp(event.target.value)}
+                    placeholder="Contoh: 6281234567890"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </label>
+
                 <fieldset className="space-y-3">
                   <legend className="text-sm font-medium text-slate-600">
                     Alamat
@@ -260,6 +312,59 @@ export default function EditProfile({
                     </label>
                   </div>
                 </fieldset>
+
+                <div className="space-y-3 pt-2">
+                  <label className="block text-sm font-medium text-slate-600">
+                    Status Lowongan Kerja
+                  </label>
+
+                  <div className="flex items-center gap-6 p-1">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
+                      <input
+                        type="radio"
+                        name="jobStatus"
+                        checked={!draftIsOpeningJob}
+                        onChange={() => {
+                          setDraftIsOpeningJob(false);
+                          setDraftJobsText("");
+                        }}
+                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <span className={!draftIsOpeningJob ? "text-slate-900 font-semibold" : "text-slate-500"}>
+                        Tidak Membuka Lowongan
+                      </span>
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
+                      <input
+                        type="radio"
+                        name="jobStatus"
+                        checked={draftIsOpeningJob}
+                        onChange={() => setDraftIsOpeningJob(true)}
+                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <span className={draftIsOpeningJob ? "text-blue-600 font-semibold" : "text-slate-500"}>
+                        Sedang Membuka Lowongan
+                      </span>
+                    </label>
+                  </div>
+
+                  {draftIsOpeningJob && (
+                    <div className="pt-1">
+                      <label className="block text-xs font-medium text-slate-500 mb-1">
+                        Posisi Pekerjaan (Pisahkan dengan koma jika lebih dari satu)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={draftJobsText}
+                        onChange={(event) => setDraftJobsText(event.target.value)}
+                        placeholder="Contoh: Barista (Full-time), Staf Gudang, Kasir"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <label className="block text-sm text-slate-600">
                   Instagram
                   <input
@@ -302,11 +407,13 @@ export default function EditProfile({
                     className="mt-1 w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
                   />
                 </label>
+
                 <div className="flex justify-end gap-2 pt-2">
                   <button
                     type="button"
                     onClick={cancelEdit}
-                    className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                    disabled={isSaving}
+                    className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50"
                   >
                     <RiCloseLine size={16} />
                     Batal
@@ -314,16 +421,17 @@ export default function EditProfile({
                   <button
                     type="button"
                     onClick={saveEdit}
-                    className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                    disabled={isSaving}
+                    className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
                   >
                     <RiSaveLine size={16} />
-                    Simpan
+                    {isSaving ? "Menyimpan..." : "Simpan"}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="space-y-7">
-                <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
+                <div className="grid gap-6 md:grid-cols-3"> {/* Changed to 3 cols for alignment */}
                   <div>
                     <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                       <RiMapPin2Line size={15} />
@@ -335,6 +443,39 @@ export default function EditProfile({
                         .join(", ") || "Belum diisi"}
                     </p>
                   </div>
+
+                  <div>
+                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      <RiTimeLine size={15} />
+                      Jam Operasional
+                    </div>
+                    <p className="text-sm leading-6 text-gray-800">
+                      {openHours || "Belum diisi"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      <RiWhatsappLine size={15} />
+                      Kontak / WhatsApp
+                    </div>
+                    <p className="text-sm leading-6 text-gray-800">
+                      {whatsapp || "Belum diisi"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div>
+                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      <RiBriefcaseLine size={15} />
+                      Lowongan Kerja
+                    </div>
+                    <p className="whitespace-pre-line text-sm leading-6 text-gray-800">
+                      {jobsText || "Belum ada lowongan"}
+                    </p>
+                  </div>
+
                   <div>
                     <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                       <RiFileTextLine size={15} />
@@ -345,6 +486,7 @@ export default function EditProfile({
                     </p>
                   </div>
                 </div>
+
                 <div className="border-t border-gray-100 pt-5">
                   <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
                     Link usaha
@@ -383,7 +525,7 @@ function SocialLink({
 }: {
   href: string;
   label: string;
-  icon: typeof RiInstagramLine;
+  icon: ComponentType<{ size?: number | string; className?: string }>;
 }) {
   if (!href) {
     return (
