@@ -71,9 +71,11 @@ export default function Penjualan() {
               <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0] text-[11px] font-bold text-[#64748B] uppercase">
                 <th className="py-4 px-6">Order ID</th>
                 <th className="py-4 px-6">Tanggal Transaksi</th>
+                <th className="py-4 px-6">Kasir</th>
                 <th className="py-4 px-6">Total</th>
-                <th className="py-4 px-6">Payment Method</th>
-                <th className="py-4 px-6">Receipt</th>
+                <th className="py-4 px-6">Metode Pembayaran</th>
+                <th className="py-4 px-6">Struk</th>
+                <th className="py-4 px-6">Hapus Transaksi</th>
               </tr>
             </thead>
             <tbody
@@ -84,6 +86,7 @@ export default function Penjualan() {
                 <tr key={t.orderId}>
                   <td className="py-3 px-6">{t.orderId}</td>
                   <td className="py-3 px-6">{t.date}</td>
+                  <td className="py-3 px-6"></td>
                   <td className="py-3 px-6">
                     Rp{t.total.toLocaleString("id-ID")}
                   </td>
@@ -100,6 +103,7 @@ export default function Penjualan() {
                       "-"
                     )}
                   </td>
+                  <td className="py-3 px-6"></td>
                 </tr>
               ))}
             </tbody>
