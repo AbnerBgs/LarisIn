@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -34,6 +35,7 @@ import {
 } from "@remixicon/react";
 import { Show, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { OriginButton } from "../ui/origin-button";
+import CreateNewDialog from "./create-new-dialog";
 
 interface NavCategory {
   label: string;
@@ -117,6 +119,19 @@ const mobileNavItems: NavItem[] = [
 export default function Navbar() {
   const pathname = usePathname();
   const { isLoaded, user } = useUser();
+  const [createOpen, setCreateOpen] = useState(false);
+
+  // Buka popup "Buat Baru" dengan alt + N.
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === "n") {
+        e.preventDefault();
+        setCreateOpen(true);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <>
@@ -136,7 +151,8 @@ export default function Navbar() {
         <div className="px-4 pt-4">
           <button
             type="button"
-            className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            onClick={() => setCreateOpen(true)}
+            className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 cursor-pointer"
           >
             <span className="flex items-center gap-2">
               <RiAddLine size={16} />
@@ -144,7 +160,7 @@ export default function Navbar() {
             </span>
 
             <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-400">
-              Ctrl + N
+              Alt + N
             </kbd>
           </button>
         </div>
@@ -272,6 +288,20 @@ export default function Navbar() {
           })}
         </ul>
       </nav>
+
+      {/* PopUp "Buat Baru" — produk & transaksi */}
+      <CreateNewDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onSaveTransaction={() => {
+          // TODO: hubungkan ke penyimpanan transaksi global.
+          setCreateOpen(false);
+        }}
+        onSaveProduct={() => {
+          // TODO: hubungkan ke penyimpanan produk global.
+          setCreateOpen(false);
+        }}
+      />
     </>
   );
 }

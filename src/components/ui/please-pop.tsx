@@ -1,6 +1,6 @@
 // components/PopUp.tsx
 import { RiCloseCircleLine } from '@remixicon/react';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 
 type PleasePopStyle = "hard-shadow" | "receipt-edge"
 
@@ -30,12 +30,27 @@ export default function PleasePop({ isOpen, onClose, children, title, style = "h
     };
   }, [isOpen]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsVisible(false);
     setTimeout(() => {
       onClose();
     }, 200);
-  };
+  }, [onClose]);
+
+  // Tutup saat tombol Escape ditekan.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 
