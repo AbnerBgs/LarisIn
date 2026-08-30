@@ -1,12 +1,10 @@
-// app/products/page.tsx
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import PleasePop from '@/components/ui/please-pop';
-import { RiArrowRightLine, RiSearchLine, RiFilter3Line } from '@remixicon/react';
+import { RiSearchLine } from '@remixicon/react';
 
-// Data produk (biasanya dari API)
 const products = [
   {
     id: 1,
@@ -68,245 +66,108 @@ interface Product {
 export default function ProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000]);
-  const [stockRange, setStockRange] = useState<[number, number]>([0, 100]);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const categories = useMemo(() => {
-    const cats = products.map(p => p.category);
-    return ['Semua', ...new Set(cats)];
-  }, []);
+  const query = searchQuery.trim().toLowerCase();
+  const filteredProducts = query
+    ? products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query),
+      )
+    : products;
 
-  // Filter
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => {
-      // Search
-      const matchSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // Category
-      const matchCategory = selectedCategory === 'Semua' || product.category === selectedCategory;
-      
-      // Price range
-      const matchPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-      
-      // Stock range
-      const matchStock = product.stock >= stockRange[0] && product.stock <= stockRange[1];
-      
-      return matchSearch && matchCategory && matchPrice && matchStock;
-    });
-  }, [searchQuery, selectedCategory, priceRange, stockRange]);
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('id-ID', {
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
     }).format(price);
-  };
-
-  // Reset filters
-  const resetFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory('Semua');
-    setPriceRange([0, 500000]);
-    setStockRange([0, 100]);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Filter Toggle */}
-      <div className="lg:hidden sticky top-16 z-10 bg-white border-b border-black p-4">
-        <button
-          onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className="w-full flex items-center justify-center gap-2 bg-black text-white py-2.5 rounded-xl font-semibold"
-        >
-          <RiFilter3Line />
-          {isFilterOpen ? 'Tutup Filter' : 'Buka Filter'}
-        </button>
-      </div>
-
-      <div className="flex flex-col lg:flex-row mx-auto p-4 lg:p-6 gap-6">
-        {/* Sidebar Filter - Sticky */}
-        <div className={`
-          sticky z-10 top-40 lg:self-start
-          lg:w-72 lg:min-w-[288px] lg:max-h-[calc(100vh-3rem)]
-          ${isFilterOpen ? 'block' : 'hidden lg:block'}
-        `}>
-          <div className="bg-white border border-black hard-shadow-static p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-6rem)]">
-            <div className="flex items-center justify-between">
-              <h2 className="font-bold text-lg">Filter Produk</h2>
-              <button
-                onClick={resetFilters}
-                className="text-xs font-semibold text-blue-600 hover:underline"
-              >
-                Reset
-              </button>
-            </div>
-
-            {/* Search */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">Cari Produk</label>
-              <div className="relative">
-                <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari nama atau deskripsi..."
-                  className="w-full pl-9 pr-3 py-2 border border-black rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
-                />
-              </div>
-            </div>
-
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">Kategori</label>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`
-                      px-3 py-1.5 text-xs font-semibold rounded-full border border-black transition-all
-                      ${selectedCategory === cat 
-                        ? 'bg-black text-white' 
-                        : 'bg-white hover:bg-gray-50'}
-                    `}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Price Range */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                Range Harga: {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
-              </label>
-              <div className="space-y-2">
-                <input
-                  type="range"
-                  min={0}
-                  max={500000}
-                  step={10000}
-                  value={priceRange[0]}
-                  onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-                  className="w-full accent-black"
-                />
-                <input
-                  type="range"
-                  min={0}
-                  max={500000}
-                  step={10000}
-                  value={priceRange[1]}
-                  onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-                  className="w-full accent-black"
-                />
-              </div>
-            </div>
-
-            {/* Stock Range */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                Range Stok: {stockRange[0]} - {stockRange[1]}
-              </label>
-              <div className="space-y-2">
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={stockRange[0]}
-                  onChange={(e) => setStockRange([Number(e.target.value), stockRange[1]])}
-                  className="w-full accent-black"
-                />
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={stockRange[1]}
-                  onChange={(e) => setStockRange([stockRange[0], Number(e.target.value)])}
-                  className="w-full accent-black"
-                />
-              </div>
-            </div>
-
-            {/* Result count */}
-            <div className="pt-4 border-t border-black/10">
-              <p className="text-sm text-gray-600">
-                Menampilkan <span className="font-bold text-black">{filteredProducts.length}</span> produk
-              </p>
-            </div>
-          </div>
+      <section className="mx-auto max-w-3xl px-4 py-6 md:px-8 md:py-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 md:text-2xl">Produk</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            {filteredProducts.length} produk ditemukan
+          </p>
         </div>
 
-        {/* Products Grid */}
-        <div className="flex-1">
-          <div className="mb-4">
-            <h1 className="text-2xl lg:text-3xl font-bold">DAFTAR PRODUK</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {filteredProducts.length} produk ditemukan
-            </p>
-          </div>
+        {/* Bar pencarian */}
+        <div className="relative mt-4">
+          <RiSearchLine
+            size={18}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari nama atau deskripsi produk..."
+            className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-black focus:outline-none focus:ring-2 focus:ring-black/10"
+          />
+        </div>
 
+        {/* Daftar produk */}
+        <section className="mt-6 overflow-hidden rounded-2xl border border-black bg-white hard-shadow-static">
           {filteredProducts.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-black p-12 text-center">
-              <p className="text-gray-500">Tidak ada produk yang sesuai dengan filter</p>
-            </div>
+            <p className="px-5 py-8 text-center text-sm text-gray-500">
+              Tidak ada produk yang cocok.
+            </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="group bg-white rounded-2xl border border-black hard-shadow overflow-hidden cursor-pointer"
-                  onClick={() => setSelectedProduct(product)}
+            <ul className="divide-y divide-gray-100">
+              {filteredProducts.map((p) => (
+                <li
+                  key={p.id}
+                  onClick={() => setSelectedProduct(p)}
+                  className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-gray-50 sm:px-5"
                 >
-                  <div className="relative h-48 bg-slate-100 border-b border-black overflow-hidden">
+                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100">
                     <Image
-                      src={product.image}
-                      alt={product.name}
+                      src={p.image}
+                      alt={p.name}
                       fill
                       className="object-cover"
                     />
-                    <span className="absolute top-3 left-3 bg-white border border-black rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider">
-                      {product.category}
-                    </span>
-                    {product.stock <= 10 && (
-                      <span
-                        className={`absolute top-3 right-3 border-2 border-black rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                          product.stock === 0 ? 'bg-rose-400' : 'bg-amber-300'
-                        }`}
-                      >
-                        {product.stock === 0 ? 'Habis' : `Sisa ${product.stock}`}
-                      </span>
-                    )}
                   </div>
 
-                  <div className="p-4">
-                    <h2 className="font-bold text-lg leading-snug mb-1.5 line-clamp-1">{product.name}</h2>
-                    <p className="text-sm text-slate-500 line-clamp-2 mb-3">{product.description}</p>
-                    <div className="flex items-center justify-between border-t border-dashed border-black/20 pt-3">
-                      <span className="font-mono font-bold text-slate-900">{formatPrice(product.price)}</span>
-                      <span className="flex items-center gap-1 text-xs font-semibold text-blue-600 transition-transform duration-200 group-hover:translate-x-1">
-                        Detail
-                        <RiArrowRightLine className="w-3 h-3" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-medium text-gray-900">
+                        {p.name}
+                      </p>
+                      <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">
+                        {p.category}
                       </span>
                     </div>
+                    <p className="mt-0.5 truncate text-xs text-gray-500">
+                      {p.description}
+                    </p>
                   </div>
-                </div>
+
+                  <div className="shrink-0 text-right">
+                    <p className="font-mono text-sm font-semibold text-gray-900">
+                      {formatPrice(p.price)}
+                    </p>
+                    <p
+                      className={`text-[11px] ${
+                        p.stock > 0 ? 'text-gray-400' : 'text-rose-500'
+                      }`}
+                    >
+                      {p.stock > 0 ? `Stok ${p.stock}` : 'Habis'}
+                    </p>
+                  </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
-        </div>
-      </div>
+        </section>
+      </section>
 
       {/* PopUp Detail Produk */}
       <PleasePop
-        style='receipt-edge'
+        style="receipt-edge"
         isOpen={!!selectedProduct}
         onClose={() => setSelectedProduct(null)}
         title={selectedProduct?.name}
@@ -321,23 +182,31 @@ export default function ProductsPage() {
                 className="object-cover rounded-xl"
               />
             </div>
-            
+
             <div>
               <p className="text-2xl font-mono font-bold text-blue-500">
                 {formatPrice(selectedProduct.price)}
               </p>
             </div>
 
-            <div className='border-t border-dashed border-black/20 pt-3'>
+            <div className="border-t border-dashed border-black/20 pt-3">
               <h3 className="font-semibold mb-1">Deskripsi</h3>
               <p className="text-gray-600">{selectedProduct.description}</p>
-              <p className="mt-2 text-sm text-black font-mono bg-amber-300 w-fit px-2 rounded-xl border">{selectedProduct.category}</p>
+              <p className="mt-2 text-sm text-black font-mono bg-amber-300 w-fit px-2 rounded-xl border">
+                {selectedProduct.category}
+              </p>
             </div>
 
             <div className="flex items-center gap-2 text-sm">
               <span className="font-semibold">Stok:</span>
-              <span className={selectedProduct.stock > 0 ? 'text-green-600' : 'text-red-600'}>
-                {selectedProduct.stock > 0 ? `${selectedProduct.stock} tersisa` : 'Habis'}
+              <span
+                className={
+                  selectedProduct.stock > 0 ? 'text-green-600' : 'text-red-600'
+                }
+              >
+                {selectedProduct.stock > 0
+                  ? `${selectedProduct.stock} tersisa`
+                  : 'Habis'}
               </span>
             </div>
           </div>
