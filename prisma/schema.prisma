@@ -11,3 +11,22 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Kategori {
+  id     String   @id @default(cuid())
+  nama   String   @unique
+  produk Produk[]
+}
+
+model Produk {
+  id         String   @id @default(cuid())
+  nama       String
+  deskripsi  String?
+  harga      Int
+  gambarUrl  String?
+  stok       Int      @default(0)
+  kategoriId String
+  kategori   Kategori @relation(fields: [kategoriId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
