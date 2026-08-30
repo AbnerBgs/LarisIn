@@ -59,7 +59,7 @@ const navMenus: NavCategory[] = [
       },
       {
         label: "Profil UMKM",
-        href: "/profileUmkm",
+        href: "/profile-umkm",
         icon: RiStore2Line,
         activeIcon: RiStore2Fill,
       },
@@ -101,11 +101,6 @@ const mobileNavItems: NavItem[] = [
     label: "Explore",
     href: "/product",
     icon: RiMapLine,
-  },
-  {
-    label: "Scan",
-    href: "/dashboard/scan",
-    icon: RiBarcodeBoxLine,
   },
   {
     label: "Penjualan",
