@@ -14,6 +14,7 @@ interface OrderReceiptProps {
   items: OrderItem[];
   businessName?: string;
   taxRate?: number;
+  onPrint?: () => void;
 }
 
 export default function OrderReceipt({
@@ -23,6 +24,7 @@ export default function OrderReceipt({
   items,
   businessName = "Toko bang dep",
   taxRate = 0.11,
+  onPrint,
 }: OrderReceiptProps) {
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -36,7 +38,14 @@ export default function OrderReceipt({
   const tax = subtotal * taxRate;
   const total = subtotal + tax;
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    if (onPrint) {
+      onPrint();
+      return;
+    }
+
+    window.print();
+  };
 
   return (
     <>

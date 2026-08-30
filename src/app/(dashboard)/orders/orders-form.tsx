@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ProductCombobox from "@/components/dashboard/product-combobox";
 import OrderReceipt from "@/components/dashboard/order-receipt";
 import type { Product } from "@/app/(dashboard)/orders/product";
@@ -38,12 +38,16 @@ interface OrdersFormProps {
   products: Product[];
 }
 
+let orderSequence = 0;
+
 export default function OrdersForm({ products }: OrdersFormProps) {
   const [formData, setFormData] = useState<OrderFormData>({
     cashierName: "",
     paymentType: "qris",
     items: [createEmptyItem()],
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const orderNumberRef = useRef("");
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -98,18 +102,113 @@ export default function OrdersForm({ products }: OrdersFormProps) {
     0,
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const createOrderNumber = () => {
+    orderSequence += 1;
+    const timestamp = new Date();
+    const stamp = [
+      timestamp.getFullYear(),
+      String(timestamp.getMonth() + 1).padStart(2, "0"),
+      String(timestamp.getDate()).padStart(2, "0"),
+      String(timestamp.getHours()).padStart(2, "0"),
+      String(timestamp.getMinutes()).padStart(2, "0"),
+      String(timestamp.getSeconds()).padStart(2, "0"),
+    ].join("");
+
+    return `ORD-${stamp}-${String(orderSequence).padStart(4, "0")}`;
+  };
+
+  const saveOrder = async (nextOrderNumber?: string) => {
+    if (isSaving) return null;
+
+    const finalOrderNumber =
+      nextOrderNumber || orderNumberRef.current || createOrderNumber();
+    orderNumberRef.current = finalOrderNumber;
+    setOrderNumber(finalOrderNumber);
+
+    const payload = {
+      cashierName: formData.cashierName.trim(),
+      paymentType: formData.paymentType,
+      orderNumber: finalOrderNumber,
+      items: formData.items
+        .filter((item) => item.productName.trim() && item.quantity > 0)
+        .map((item) => ({
+          productId: item.productId,
+          productName: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+    };
+
+    if (!payload.cashierName || payload.items.length === 0) {
+      alert("Nama kasir dan minimal satu produk harus diisi.");
+      return null;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Gagal menyimpan pesanan");
+      }
+
+      setOrderNumber(result.orderNumber ?? payload.orderNumber);
+      orderNumberRef.current = result.orderNumber ?? payload.orderNumber;
+      return result;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Order data:", formData);
-    window.print();
+
+    try {
+      const result = await saveOrder();
+      if (!result) return;
+
+      alert("Pesanan berhasil disimpan!");
+      setFormData({
+        cashierName: "",
+        paymentType: "qris",
+        items: [createEmptyItem()],
+      });
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Gagal menyimpan pesanan");
+    }
+  };
+
+  const handlePrintReceipt = async () => {
+    try {
+      const result = await saveOrder(
+        orderNumberRef.current || createOrderNumber(),
+      );
+      if (!result) return;
+
+      window.print();
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Gagal menyimpan dan mencetak struk",
+      );
+    }
   };
 
   const [orderNumber, setOrderNumber] = useState("");
 
   useEffect(() => {
-    setOrderNumber(
-      `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-    );
+    const initialNumber = createOrderNumber();
+    orderNumberRef.current = initialNumber;
+    setOrderNumber(initialNumber);
   }, []);
 
   const handleReset = () => {
@@ -282,6 +381,7 @@ export default function OrdersForm({ products }: OrdersFormProps) {
               orderNumber={orderNumber}
               paymentType={formData.paymentType}
               items={formData.items}
+              onPrint={handlePrintReceipt}
             />
           </div>
         </div>

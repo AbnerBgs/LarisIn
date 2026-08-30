@@ -19,14 +19,38 @@ model Kategori {
 }
 
 model Produk {
-  id         String   @id @default(dbgenerated("gen_random_uuid()::text"))
-  nama       String
-  deskripsi  String?
-  harga      Int
-  gambarUrl  String?
-  stok       Int      @default(0)
-  kategoriId String
-  kategori   Kategori @relation(fields: [kategoriId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id            String          @id @default(dbgenerated("gen_random_uuid()::text"))
+  nama          String
+  deskripsi     String?
+  harga         Int
+  gambarUrl     String?
+  stok          Int             @default(0)
+  kategoriId    String
+  kategori      Kategori        @relation(fields: [kategoriId], references: [id])
+  penjualanItem PenjualanItem[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Penjualan {
+  id          String          @id @default(dbgenerated("gen_random_uuid()::text"))
+  orderNumber String          @unique
+  cashierName String
+  paymentType String
+  total       Int
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  items       PenjualanItem[]
+}
+
+model PenjualanItem {
+  id          String    @id @default(dbgenerated("gen_random_uuid()::text"))
+  penjualanId String
+  penjualan   Penjualan @relation(fields: [penjualanId], references: [id], onDelete: Cascade)
+  produkId    String?
+  produk      Produk?   @relation(fields: [produkId], references: [id])
+  productName String
+  price       Int
+  quantity    Int
+  createdAt   DateTime  @default(now())
 }
