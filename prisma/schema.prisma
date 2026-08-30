@@ -13,13 +13,13 @@ datasource db {
 }
 
 model Kategori {
-  id     String   @id @default(cuid())
+  id     String   @id @default(dbgenerated("gen_random_uuid()::text"))
   nama   String   @unique
   produk Produk[]
 }
 
 model Produk {
-  id         String   @id @default(cuid())
+  id         String   @id @default(dbgenerated("gen_random_uuid()::text"))
   nama       String
   deskripsi  String?
   harga      Int
