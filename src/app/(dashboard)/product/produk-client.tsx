@@ -1,75 +1,121 @@
-// app/produk/produk-client.tsx
 "use client";
+
+// app/produk/produk-client.tsx
+// Shell klien halaman Produk: pencarian, daftar, detail, edit, dan hapus.
+// Produk tanpa gambar menampilkan ikon RemixIcon sesuai kategorinya.
 
 import { useState } from "react";
 import Image from "next/image";
+import {
+  RiArmchairLine,
+  RiBowlLine,
+  RiBox3Line,
+  RiCupLine,
+  RiDeleteBinLine,
+  RiHeartPulseLine,
+  RiImageLine,
+  RiPencilLine,
+  RiSearchLine,
+  RiToolsLine,
+  type RemixiconComponentType,
+} from "@remixicon/react";
 import PleasePop from "@/components/ui/please-pop";
-import { RiSearchLine } from "@remixicon/react";
-
-// const products = [
-//   {
-//     id: 1,
-//     name: "Kaos Polos Hitam",
-//     price: 150000,
-//     image: "https://picsum.photos/200/300",
-//     description:
-//       "Kaos polos premium 100% katun combed 30s. Nyaman dipakai sehari-hari.",
-//     category: "Pakaian Pria",
-//     stock: 25,
-//   },
-//   {
-//     id: 2,
-//     name: "Jaket Denim Biru",
-//     price: 350000,
-//     image: "https://picsum.photos/200/300",
-//     description:
-//       "Jaket denim klasik dengan bahan tebal dan nyaman. Cocok untuk gaya kasual.",
-//     category: "Jaket",
-//     stock: 10,
-//   },
-//   {
-//     id: 3,
-//     name: "Sepatu Sneakers Putih",
-//     price: 450000,
-//     image: "https://picsum.photos/200/300",
-//     description:
-//       "Sneakers putih minimalis dengan sol empuk. Bahan premium tahan lama.",
-//     category: "Sepatu",
-//     stock: 8,
-//   },
-//   {
-//     id: 4,
-//     name: "Kemeja Flanel Merah",
-//     price: 250000,
-//     image: "https://picsum.photos/200/300",
-//     description: "Kemeja flanel bahan hangat dengan motif kotak-kotak klasik.",
-//     category: "Pakaian Pria",
-//     stock: 15,
-//   },
-//   {
-//     id: 5,
-//     name: "Tas Ransel Kanvas",
-//     price: 180000,
-//     image: "https://picsum.photos/200/300",
-//     description: "Tas ransel kanvas premium dengan banyak kompartemen.",
-//     category: "Aksesoris",
-//     stock: 3,
-//   },
-// ];
+import ProductForm, {
+  type NewProductInput,
+} from "@/components/dashboard/product-form";
 
 interface Product {
   id: string;
   name: string;
   price: number;
-  image: string;
+  image: string | null;
   description: string;
   category: string;
   stock: number;
 }
 
-export default function ProdukClient({ products }: { products: Product[] }) {
+// Ikon fallback per kategori saat produk tidak punya gambar.
+const CATEGORY_ICONS: Record<string, RemixiconComponentType> = {
+  Makanan: RiBowlLine,
+  Minuman: RiCupLine,
+  Alat: RiToolsLine,
+  Perawatan: RiHeartPulseLine,
+  Perabotan: RiArmchairLine,
+  Lainnya: RiBox3Line,
+};
+
+function CategoryIcon({
+  category,
+  className,
+  iconSize = 18,
+}: {
+  category: string;
+  className?: string;
+  iconSize?: number;
+}) {
+  const Icon = CATEGORY_ICONS[category] ?? RiImageLine;
+  return (
+    <div
+      className={`flex items-center justify-center ${className ?? ""}`}
+    >
+      <Icon size={iconSize} />
+    </div>
+  );
+}
+
+function ProductImage({
+  product,
+  failed,
+  onError,
+  className,
+  iconSize = 18,
+}: {
+  product: Product;
+  failed: boolean;
+  onError: () => void;
+  className: string;
+  iconSize?: number;
+}) {
+  return (
+    <div className={`relative overflow-hidden bg-slate-100 ${className}`}>
+      {product.image && !failed ? (
+        <Image
+          src={product.image}
+          alt={product.name}
+          fill
+          className="object-cover"
+          onError={onError}
+        />
+      ) : (
+        <CategoryIcon
+          category={product.category}
+          className="h-full w-full text-slate-500"
+          iconSize={iconSize}
+        />
+      )}
+    </div>
+  );
+}
+
+export default function ProdukClient({
+  products: initialProducts,
+}: {
+  products: Product[];
+}) {
+  const [products, setProducts] = useState(initialProducts);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+
+  // Sinkronkan dengan data server, mis. setelah router.refresh() usai
+  // menambah produk lewat dialog "Buat Baru" (pola "adjust state during render").
+  const [prevInitialProducts, setPrevInitialProducts] =
+    useState(initialProducts);
+  if (prevInitialProducts !== initialProducts) {
+    setPrevInitialProducts(initialProducts);
+    setProducts(initialProducts);
+  }
 
   const query = searchQuery.trim().toLowerCase();
   const filteredProducts = query
@@ -86,6 +132,96 @@ export default function ProdukClient({ products }: { products: Product[] }) {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(price);
+
+  const markImageFailed = (id: string) =>
+    setFailedImages((prev) => new Set(prev).add(id));
+
+  const handleSaveEdit = async (input: NewProductInput) => {
+    if (!editingProduct) return;
+
+    try {
+      const response = await fetch(`/api/product/${editingProduct.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nama: input.name,
+          harga: input.price,
+          stok: input.stock,
+          deskripsi: input.description,
+          kategori: input.category, // Nama kategori, dicari ID-nya di backend
+          gambarUrl: input.gambarUrl,
+        }),
+      });
+
+      const resData = await response.json();
+
+      if (!response.ok) {
+        console.error("Server Error Response:", resData);
+        throw new Error(resData.details || resData.error || "Server Error");
+      }
+
+      const updated: Product = {
+        id: resData.id,
+        name: resData.nama,
+        price: resData.harga,
+        image: resData.gambarUrl,
+        description: resData.deskripsi ?? "",
+        category: resData.kategori?.nama ?? "Tanpa Kategori",
+        stock: resData.stok,
+      };
+
+      setProducts((prev) =>
+        prev.map((p) => (p.id === updated.id ? updated : p)),
+      );
+      setSelectedProduct((current) =>
+        current?.id === updated.id ? updated : current,
+      );
+      setFailedImages((prev) => {
+        if (!prev.has(updated.id)) return prev;
+        const next = new Set(prev);
+        next.delete(updated.id);
+        return next;
+      });
+      setEditingProduct(null);
+    } catch (err) {
+      console.error("Fetch Exception:", err);
+      alert(
+        err instanceof Error
+          ? err.message
+          : "Tidak dapat terhubung ke Server API.",
+      );
+    }
+  };
+
+  const handleDelete = async (product: Product) => {
+    if (!window.confirm(`Hapus produk "${product.name}"?`)) return;
+
+    try {
+      const response = await fetch(`/api/product/${product.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const resData = await response.json().catch(() => null);
+        throw new Error(resData?.error || "Gagal menghapus produk");
+      }
+
+      setProducts((prev) => prev.filter((p) => p.id !== product.id));
+      setSelectedProduct((current) =>
+        current?.id === product.id ? null : current,
+      );
+      setEditingProduct((current) =>
+        current?.id === product.id ? null : current,
+      );
+    } catch (err) {
+      console.error("Fetch Exception:", err);
+      alert(
+        err instanceof Error
+          ? err.message
+          : "Tidak dapat terhubung ke Server API.",
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -116,7 +252,9 @@ export default function ProdukClient({ products }: { products: Product[] }) {
         <section className="mt-6 overflow-hidden rounded-2xl border border-black bg-white hard-shadow-static">
           {filteredProducts.length === 0 ? (
             <p className="px-5 py-8 text-center text-sm text-gray-500">
-              Tidak ada produk yang cocok.
+              {query
+                ? "Tidak ada produk yang cocok."
+                : 'Belum ada produk. Klik tombol "Buat Baru" di sidebar untuk menambah produk.'}
             </p>
           ) : (
             <ul className="divide-y divide-gray-100">
@@ -126,14 +264,12 @@ export default function ProdukClient({ products }: { products: Product[] }) {
                   onClick={() => setSelectedProduct(p)}
                   className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-gray-50 sm:px-5"
                 >
-                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                    <Image
-                      src={p.image}
-                      alt={p.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
+                  <ProductImage
+                    product={p}
+                    failed={failedImages.has(p.id)}
+                    onError={() => markImageFailed(p.id)}
+                    className="h-10 w-10 shrink-0 rounded-lg"
+                  />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -145,7 +281,7 @@ export default function ProdukClient({ products }: { products: Product[] }) {
                       </span>
                     </div>
                     <p className="mt-0.5 truncate text-xs text-gray-500">
-                      {p.description}
+                      {p.description || "Tidak ada deskripsi"}
                     </p>
                   </div>
 
@@ -159,6 +295,31 @@ export default function ProdukClient({ products }: { products: Product[] }) {
                       {p.stock > 0 ? `Stok ${p.stock}` : "Habis"}
                     </p>
                   </div>
+
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      aria-label={`Edit ${p.name}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingProduct(p);
+                      }}
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                    >
+                      <RiPencilLine size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Hapus ${p.name}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void handleDelete(p);
+                      }}
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                    >
+                      <RiDeleteBinLine size={16} />
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -166,6 +327,7 @@ export default function ProdukClient({ products }: { products: Product[] }) {
         </section>
       </section>
 
+      {/* Detail produk */}
       <PleasePop
         style="receipt-edge"
         isOpen={!!selectedProduct}
@@ -174,14 +336,13 @@ export default function ProdukClient({ products }: { products: Product[] }) {
       >
         {selectedProduct && (
           <div className="space-y-4">
-            <div className="relative h-64 rounded-2xl bg-gray-200">
-              <Image
-                src={selectedProduct.image}
-                alt={selectedProduct.name}
-                fill
-                className="object-cover rounded-xl"
-              />
-            </div>
+            <ProductImage
+              product={selectedProduct}
+              failed={failedImages.has(selectedProduct.id)}
+              onError={() => markImageFailed(selectedProduct.id)}
+              className="h-64 rounded-xl"
+              iconSize={44}
+            />
 
             <div>
               <p className="text-2xl font-mono font-bold text-blue-500">
@@ -191,7 +352,9 @@ export default function ProdukClient({ products }: { products: Product[] }) {
 
             <div className="border-t border-dashed border-black/20 pt-3">
               <h3 className="font-semibold mb-1">Deskripsi</h3>
-              <p className="text-gray-600">{selectedProduct.description}</p>
+              <p className="text-gray-600">
+                {selectedProduct.description || "Tidak ada deskripsi"}
+              </p>
               <p className="mt-2 text-sm text-black font-mono bg-amber-300 w-fit px-2 rounded-xl border">
                 {selectedProduct.category}
               </p>
@@ -209,7 +372,53 @@ export default function ProdukClient({ products }: { products: Product[] }) {
                   : "Habis"}
               </span>
             </div>
+
+            <div className="flex gap-3 border-t border-dashed border-black/20 pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingProduct(selectedProduct);
+                  setSelectedProduct(null);
+                }}
+                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-black bg-white px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-blue-50"
+              >
+                <RiPencilLine size={16} />
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleDelete(selectedProduct)}
+                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100"
+              >
+                <RiDeleteBinLine size={16} />
+                Hapus
+              </button>
+            </div>
           </div>
+        )}
+      </PleasePop>
+
+      {/* Edit produk */}
+      <PleasePop
+        style="hard-shadow"
+        isOpen={!!editingProduct}
+        onClose={() => setEditingProduct(null)}
+        title="Edit Produk"
+      >
+        {editingProduct && (
+          <ProductForm
+            initial={{
+              name: editingProduct.name,
+              price: String(editingProduct.price),
+              category: editingProduct.category,
+              stock: String(editingProduct.stock),
+              description: editingProduct.description,
+              gambarUrl: editingProduct.image,
+            }}
+            submitLabel="Simpan Perubahan"
+            onCancel={() => setEditingProduct(null)}
+            onSubmit={handleSaveEdit}
+          />
         )}
       </PleasePop>
     </div>

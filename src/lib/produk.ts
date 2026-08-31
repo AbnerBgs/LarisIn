@@ -1,5 +1,22 @@
 import { prisma } from "@/lib/prisma";
 
+// Batas panjang gambarUrl (data URL hasil kompresi klien jauh di bawah ini).
+// Melindungi kolom TEXT di DB agar tidak membengkak oleh payload sembarangan.
+export const MAX_GAMBAR_URL_LENGTH = 400_000;
+
+// Ambil (atau buat bila belum ada) kategori milik user berdasarkan nama.
+// Dipakai bersama oleh POST /api/product dan PUT /api/product/[id].
+export async function resolveKategoriId(userId: string, nama: string) {
+  const categoryRecord = await prisma.kategori.upsert({
+    where: {
+      userId_nama: { userId, nama },
+    },
+    update: {},
+    create: { userId, nama },
+  });
+  return categoryRecord.id;
+}
+
 // GET — produk milik satu user (scope dari sesi Clerk).
 export async function getProduk(userId: string) {
   const produk = await prisma.produk.findMany({

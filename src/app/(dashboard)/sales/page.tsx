@@ -163,7 +163,7 @@ export default function PenjualanPage() {
                       <button
                         type="button"
                         onClick={() => handleDelete(t.orderId)}
-                        className="rounded-md hard-shadow bg-red-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-red-800"
+                        className="rounded-md border border-black hard-shadow bg-red-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-red-800"
                       >
                         Hapus
                       </button>
