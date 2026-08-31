@@ -61,6 +61,8 @@ export default async function Dashboard({
   let prevIncome = 0;
   let expense = 0;
   let prevExpense = 0;
+  let visitors = 0;
+  let prevVisitors = 0;
   let salesByDay: { date: string; total: number }[] = [];
   let monthlyTarget = 0;
 
@@ -68,6 +70,8 @@ export default async function Dashboard({
     const [
       incomeAgg,
       prevIncomeAgg,
+      manualIncomeAgg,
+      prevManualIncomeAgg,
       expenseAgg,
       prevExpenseAgg,
       sales,
@@ -80,6 +84,22 @@ export default async function Dashboard({
       prisma.penjualan.aggregate({
         where: { userId, createdAt: { gte: prevMonthStart, lt: monthStart } },
         _sum: { total: true },
+      }),
+      prisma.transaksiKeuangan.aggregate({
+        where: {
+          userId,
+          type: "income",
+          date: { gte: monthStart, lt: nextMonthStart },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.transaksiKeuangan.aggregate({
+        where: {
+          userId,
+          type: "income",
+          date: { gte: prevMonthStart, lt: monthStart },
+        },
+        _sum: { amount: true },
       }),
       prisma.transaksiKeuangan.aggregate({
         where: {
@@ -104,11 +124,23 @@ export default async function Dashboard({
       prisma.targetPendapatan.findUnique({ where: { userId } }),
     ]);
 
-    income = incomeAgg._sum.total ?? 0;
-    prevIncome = prevIncomeAgg._sum.total ?? 0;
+    // Pendapatan = penjualan kasir + pemasukan manual — definisi yang
+    // sama dengan halaman Keuangan agar angka selalu konsisten.
+    income = (incomeAgg._sum.total ?? 0) + (manualIncomeAgg._sum.amount ?? 0);
+    prevIncome =
+      (prevIncomeAgg._sum.total ?? 0) + (prevManualIncomeAgg._sum.amount ?? 0);
     expense = expenseAgg._sum.amount ?? 0;
     prevExpense = prevExpenseAgg._sum.amount ?? 0;
     monthlyTarget = targetRow?.amount ?? 0;
+
+    // Total Pengunjung = berapa kali kasir melayani pelanggan, yaitu
+    // jumlah transaksi kasir (Penjualan) bulan ini.
+    visitors = sales.filter(
+      (s) => s.createdAt >= monthStart && s.createdAt < nextMonthStart,
+    ).length;
+    prevVisitors = sales.filter(
+      (s) => s.createdAt >= prevMonthStart && s.createdAt < monthStart,
+    ).length;
 
     // Total penjualan per tanggal untuk grafik (yyyy-mm-dd).
     const daily = new Map<string, number>();
@@ -125,6 +157,7 @@ export default async function Dashboard({
   const net = income - expense;
   const incomeChange = pctChange(income, prevIncome);
   const netChange = pctChange(net, prevIncome - prevExpense);
+  const visitorsChange = pctChange(visitors, prevVisitors);
 
   const changeText = (change: number | null) =>
     change === null
@@ -151,11 +184,12 @@ export default async function Dashboard({
       icon: RiMoneyDollarCircleLine,
     },
     {
-      // Belum ada sumber data pengunjung — masih tampilan statis.
+      // Total Pengunjung = jumlah transaksi kasir (Penjualan) — setiap
+      // penjualan berarti kasir melayani satu pelanggan.
       label: "Total Pengunjung",
-      value: "199",
-      change: "+8% dari bulan lalu",
-      changeUp: 8,
+      value: String(visitors),
+      change: changeText(visitorsChange),
+      changeUp: visitorsChange,
       bg: "bg-emerald-100",
       valueColor: "text-emerald-900",
       icon: RiGroup3Line,

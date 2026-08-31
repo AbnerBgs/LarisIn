@@ -4,7 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import ProductCombobox from "@/components/dashboard/product-combobox";
 import OrderReceipt from "@/components/dashboard/order-receipt";
 import type { Product } from "@/app/(dashboard)/orders/product";
-import { RiAddLine, RiDeleteBinLine, RiRefreshLine } from "@remixicon/react";
+import {
+  RiAddLine,
+  RiDeleteBinLine,
+  RiRefreshLine,
+  RiUserLine,
+} from "@remixicon/react";
 
 interface OrderItem {
   id: string;
@@ -36,17 +41,20 @@ const createEmptyItem = (): OrderItem => ({
 
 interface OrdersFormProps {
   products: Product[];
+  /** Jumlah pelanggan yang sudah dilayani kasir hari ini (dari server). */
+  todayServed?: number;
 }
 
 let orderSequence = 0;
 
-export default function OrdersForm({ products }: OrdersFormProps) {
+export default function OrdersForm({ products, todayServed }: OrdersFormProps) {
   const [formData, setFormData] = useState<OrderFormData>({
     cashierName: "",
     paymentType: "qris",
     items: [createEmptyItem()],
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [todayServedCount, setTodayServedCount] = useState(todayServed ?? 0);
   const orderNumberRef = useRef("");
 
   const formatPrice = (price: number) =>
@@ -174,6 +182,9 @@ export default function OrdersForm({ products }: OrdersFormProps) {
       if (!result) return;
 
       alert("Pesanan berhasil disimpan!");
+      setTodayServedCount((prev) => prev + 1);
+      // Sinkronkan halaman Keuangan bila sedang terbuka.
+      window.dispatchEvent(new CustomEvent("finance-updated"));
       setFormData({
         cashierName: "",
         paymentType: "qris",
@@ -192,6 +203,8 @@ export default function OrdersForm({ products }: OrdersFormProps) {
       );
       if (!result) return;
 
+      setTodayServedCount((prev) => prev + 1);
+      window.dispatchEvent(new CustomEvent("finance-updated"));
       window.print();
     } catch (error) {
       console.error(error);
@@ -230,6 +243,10 @@ export default function OrdersForm({ products }: OrdersFormProps) {
                 <div>
                   <h1 className="font-semibold text-xl">New Order</h1>
                   <p className="text-md">Fill in the order details below</p>
+                  <p className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1 font-mono text-xs font-semibold text-emerald-700">
+                    <RiUserLine size={14} />
+                    {todayServedCount} pelanggan dilayani hari ini
+                  </p>
                 </div>
                 <button
                   type="button"

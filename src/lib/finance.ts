@@ -244,9 +244,18 @@ export interface FinanceSummary {
   netChange: number | null;
 }
 
+/**
+ * Ringkasan keuangan untuk satu periode.
+ *
+ * Definisi angka yang KONSISTEN dengan halaman Dashboard:
+ * - Pendapatan = total penjualan kasir (`sales`) + pemasukan manual.
+ * - Pengeluaran = pengeluaran manual (TransaksiKeuangan tipe expense).
+ * `sales` berbentuk [{ date: "yyyy-mm-dd", total }] (tanggal UTC createdAt).
+ */
 export function summarizeTransactions(
   transactions: FinanceTransaction[],
   period: FinancePeriod,
+  sales: { date: string; total: number }[] = [],
 ): FinanceSummary {
   const startISO = toISODate(period.start);
   const endISO = toISODate(period.end);
@@ -265,6 +274,15 @@ export function summarizeTransactions(
     } else if (t.date >= prevStartISO && t.date <= prevEndISO) {
       if (t.type === "income") prevIncome += t.amount;
       else prevExpense += t.amount;
+    }
+  }
+
+  // Penjualan kasir dihitung sebagai pendapatan toko.
+  for (const s of sales) {
+    if (s.date >= startISO && s.date <= endISO) {
+      income += s.total;
+    } else if (s.date >= prevStartISO && s.date <= prevEndISO) {
+      prevIncome += s.total;
     }
   }
 
@@ -358,6 +376,7 @@ export function buildFinanceChartData(
   transactions: FinanceTransaction[],
   period: FinancePeriod,
   monthlyTarget = 0,
+  sales: { date: string; total: number }[] = [],
 ): FinanceChartPoint[] {
   const points: FinanceChartPoint[] = [];
   const bucketRanges: { start: string; end: string; index: number }[] = [];
@@ -454,6 +473,17 @@ export function buildFinanceChartData(
     const point = points[bucket.index];
     if (t.type === "income") point.pendapatan += t.amount;
     else point.pengeluaran += t.amount;
+  }
+
+  // Penjualan kasir ikut dihitung sebagai pendapatan (konsisten dengan
+  // dashboard).
+  for (const s of sales) {
+    if (s.date < startISO || s.date > endISO) continue;
+    const bucket = bucketRanges.find(
+      (r) => s.date >= r.start && s.date <= r.end,
+    );
+    if (!bucket) continue;
+    points[bucket.index].pendapatan += s.total;
   }
 
   for (const point of points) {

@@ -33,19 +33,45 @@ function toFinanceTx(t: {
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-// GET: transaksi keuangan milik user yang sedang login.
+// GET: transaksi keuangan + riwayat penjualan kasir milik user yang
+// sedang login. Penjualan kasir dipakai sebagai bagian pendapatan agar
+// angka halaman Keuangan konsisten dengan halaman Dashboard.
 export async function GET() {
   const userId = await getSessionUserId();
   if (!userId) return unauthorized();
 
   try {
-    const transactions = await prisma.transaksiKeuangan.findMany({
-      where: { userId },
-      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
-    });
+    const [transactions, sales] = await Promise.all([
+      prisma.transaksiKeuangan.findMany({
+        where: { userId },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+      }),
+      prisma.penjualan.findMany({
+        where: { userId },
+        select: {
+          id: true,
+          orderNumber: true,
+          cashierName: true,
+          paymentType: true,
+          total: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
 
     return NextResponse.json({
       transactions: transactions.map(toFinanceTx),
+      sales: sales.map((s) => ({
+        id: s.id,
+        orderNumber: s.orderNumber,
+        cashierName: s.cashierName,
+        paymentType: s.paymentType,
+        total: s.total,
+        // Tanggal UTC agar konsisten dengan tampilan riwayat kasir
+        // dan agregasi grafik dashboard.
+        date: s.createdAt.toISOString().slice(0, 10),
+      })),
     });
   } catch (error) {
     console.error("GET /api/finance error:", error);

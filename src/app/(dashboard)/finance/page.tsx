@@ -28,6 +28,7 @@ import {
   RiMoneyDollarCircleLine,
   RiMore2Line,
   RiPercentLine,
+  RiShoppingCartLine,
   RiStockLine,
   RiTeamLine,
   RiToolsLine,
@@ -50,6 +51,19 @@ import {
   type FinanceTransaction,
   type NewFinanceTransaction,
 } from "@/lib/finance";
+
+/* ------------------------------------------------------------------ */
+/* Penjualan kasir — bagian dari pendapatan toko (konsisten dgn dashboard) */
+/* ------------------------------------------------------------------ */
+
+type SaleRow = {
+  id: string;
+  orderNumber: string;
+  cashierName: string;
+  paymentType: string;
+  total: number;
+  date: string;
+};
 
 /* ------------------------------------------------------------------ */
 /* Meta tampilan kategori pengeluaran                                  */
@@ -296,6 +310,7 @@ function TargetCard({
 
 export default function FinancePage() {
   const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
+  const [sales, setSales] = useState<SaleRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [periodKey, setPeriodKey] = useState<FinancePeriodKey>("this-month");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -303,9 +318,9 @@ export default function FinancePage() {
   const [monthlyTarget, setMonthlyTarget] = useState(0);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
 
-  // Muat transaksi dari database (API /api/finance).
-  // Dengarkan juga event "finance-updated" yang dikirim navbar saat
-  // transaksi baru dibuat lewat dialog "Buat Baru".
+  // Muat transaksi manual + riwayat penjualan kasir dari database
+  // (API /api/finance). Dengarkan juga event "finance-updated" yang
+  // dikirim navbar / halaman kasir saat ada transaksi baru.
   const loadTransactions = useCallback(() => {
     fetch("/api/finance")
       .then((res) => {
@@ -314,11 +329,13 @@ export default function FinancePage() {
       })
       .then((data) => {
         setTransactions(data.transactions ?? []);
+        setSales(data.sales ?? []);
         setLoading(false);
       })
       .catch((error) => {
         console.error(error);
         setTransactions([]);
+        setSales([]);
         setLoading(false);
       });
   }, []);
@@ -351,29 +368,50 @@ export default function FinancePage() {
 
   const period = useMemo(() => getFinancePeriod(periodKey), [periodKey]);
   const summary = useMemo(
-    () => summarizeTransactions(transactions, period),
-    [transactions, period],
+    () => summarizeTransactions(transactions, period, sales),
+    [transactions, period, sales],
   );
   const breakdown = useMemo(
     () => breakdownExpenses(transactions, period),
     [transactions, period],
   );
   const chartData = useMemo(
-    () => buildFinanceChartData(transactions, period, monthlyTarget),
-    [transactions, period, monthlyTarget],
+    () => buildFinanceChartData(transactions, period, monthlyTarget, sales),
+    [transactions, period, monthlyTarget, sales],
   );
 
-  const recentTransactions = useMemo(() => {
+  // Riwayat gabungan: penjualan kasir + transaksi manual, diurutkan
+  // berdasarkan tanggal terbaru. Definisi pendapatan sama dengan
+  // dashboard: penjualan kasir adalah pendapatan toko.
+  const history = useMemo(() => {
     const startISO = toISODate(period.start);
     const endISO = toISODate(period.end);
-    return transactions
-      .filter((t) => t.date >= startISO && t.date <= endISO)
-      .sort((a, b) => b.date.localeCompare(a.date));
-  }, [transactions, period]);
 
-  const visibleTransactions = showAllTransactions
-    ? recentTransactions
-    : recentTransactions.slice(0, 6);
+    const saleRows = sales.map((s) => ({
+      id: `sale-${s.id}`,
+      kind: "sale" as const,
+      description: `Penjualan ${s.orderNumber}`,
+      category: s.paymentType.toUpperCase(),
+      amount: s.total,
+      date: s.date,
+    }));
+    const txRows = transactions.map((t) => ({
+      id: t.id,
+      kind: t.type,
+      description: t.description,
+      category: t.category,
+      amount: t.amount,
+      date: t.date,
+    }));
+
+    return [...saleRows, ...txRows]
+      .filter((row) => row.date >= startISO && row.date <= endISO)
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }, [transactions, sales, period]);
+
+  const visibleHistory = showAllTransactions
+    ? history
+    : history.slice(0, 6);
 
   // Laba & rugi: HPP diasumsikan pengeluaran kategori Stok.
   const hpp = breakdown.find((b) => b.category === "Stok")?.amount ?? 0;
@@ -786,10 +824,10 @@ export default function FinancePage() {
                 Transaksi Terbaru
               </h2>
               <p className="mt-0.5 text-xs text-gray-500">
-                {recentTransactions.length} transaksi · {period.rangeLabel}
+                {history.length} transaksi · {period.rangeLabel}
               </p>
             </div>
-            {recentTransactions.length > 6 && !showAllTransactions && (
+            {history.length > 6 && !showAllTransactions && (
               <button
                 type="button"
                 onClick={() => setShowAllTransactions(true)}
@@ -805,56 +843,63 @@ export default function FinancePage() {
             <p className="px-5 py-8 text-center text-sm text-gray-500">
               Memuat transaksi...
             </p>
-          ) : recentTransactions.length === 0 ? (
+          ) : history.length === 0 ? (
             <p className="px-5 py-8 text-center text-sm text-gray-500">
               Belum ada transaksi pada periode ini.
             </p>
           ) : (
             <ul className="divide-y divide-gray-100">
-              {visibleTransactions.map((t) => {
-                const income = t.type === "income";
+              {visibleHistory.map((row) => {
+                const isExpense = row.kind === "expense";
+                const isSale = row.kind === "sale";
                 return (
                   <li
-                    key={t.id}
+                    key={row.id}
                     className="flex items-center gap-3 px-4 py-3 sm:px-5"
                   >
                     <span
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                        income
-                          ? "bg-emerald-100 text-emerald-600"
-                          : "bg-rose-100 text-rose-600"
+                        isExpense
+                          ? "bg-rose-100 text-rose-600"
+                          : "bg-emerald-100 text-emerald-600"
                       }`}
                     >
-                      {income ? (
-                        <RiArrowUpCircleLine size={18} />
-                      ) : (
+                      {isSale ? (
+                        <RiShoppingCartLine size={18} />
+                      ) : isExpense ? (
                         <RiArrowDownCircleLine size={18} />
+                      ) : (
+                        <RiArrowUpCircleLine size={18} />
                       )}
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-gray-900">
-                        {t.description}
+                        {row.description}
                       </p>
                       <p className="mt-0.5 text-xs text-gray-500">
-                        {formatTxDate(t.date)} · {t.category}
+                        {formatTxDate(row.date)} · {row.category}
                       </p>
                     </div>
                     <span
                       className={`hidden shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium sm:inline-flex ${
-                        income
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-rose-50 text-rose-700"
+                        isExpense
+                          ? "bg-rose-50 text-rose-700"
+                          : "bg-emerald-50 text-emerald-700"
                       }`}
                     >
-                      {income ? "Pemasukan" : "Pengeluaran"}
+                      {isSale
+                        ? "Penjualan"
+                        : isExpense
+                          ? "Pengeluaran"
+                          : "Pemasukan"}
                     </span>
                     <span
                       className={`shrink-0 font-mono text-sm font-semibold tabular-nums ${
-                        income ? "text-emerald-600" : "text-rose-600"
+                        isExpense ? "text-rose-600" : "text-emerald-600"
                       }`}
                     >
-                      {income ? "+" : "-"}
-                      {formatIDR(t.amount)}
+                      {isExpense ? "-" : "+"}
+                      {formatIDR(row.amount)}
                     </span>
                   </li>
                 );
