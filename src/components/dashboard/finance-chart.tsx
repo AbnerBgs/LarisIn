@@ -57,6 +57,15 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
           {formatIDR(point.pengeluaran)}
         </span>
       </div>
+      {point.target > 0 && (
+        <div className="mt-1 flex items-center gap-2 text-sm">
+          <span className="h-0 w-2.5 border-t-2 border-dashed border-indigo-500" />
+          <span className="text-slate-500">Target</span>
+          <span className="ml-auto font-mono font-medium text-slate-800">
+            {formatIDR(point.target)}
+          </span>
+        </div>
+      )}
       <p
         className={`mt-1.5 flex items-center gap-1.5 border-t border-slate-100 pt-1.5 text-xs font-medium ${
           laba >= 0 ? "text-teal-600" : "text-rose-500"
@@ -80,6 +89,9 @@ export default function FinanceChart({
 }: {
   data: FinanceChartPoint[];
 }) {
+  // Garis target hanya dirender bila ada target yang sudah diatur.
+  const hasTarget = data.some((p) => p.target > 0);
+
   return (
     <div className="w-full p-5 pt-3 sm:p-6 sm:pt-3">
       {/* Legend ringkas */}
@@ -93,6 +105,12 @@ export default function FinanceChart({
         <span className="flex items-center gap-1.5">
           <span className="h-0.5 w-4 rounded bg-amber-500" /> Laba Bersih
         </span>
+        {hasTarget && (
+          <span className="flex items-center gap-1.5">
+            <span className="h-0 w-4 border-t-2 border-dashed border-indigo-500" />{" "}
+            Target
+          </span>
+        )}
       </div>
 
       {/* Chart */}
@@ -147,6 +165,17 @@ export default function FinanceChart({
               dot={false}
               activeDot={{ r: 4, fill: "#d97706", stroke: "#fff", strokeWidth: 2 }}
             />
+            {hasTarget && (
+              <Line
+                type="monotone"
+                dataKey="target"
+                stroke="#6366f1"
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                dot={false}
+                activeDot={{ r: 4, fill: "#6366f1", stroke: "#fff", strokeWidth: 2 }}
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>

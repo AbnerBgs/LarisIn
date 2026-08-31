@@ -3,9 +3,16 @@
 // Halaman Keuangan — ringkasan, grafik, rincian pengeluaran, laba & rugi,
 // transaksi terbaru, dan insight bisnis. Semua angka diturunkan dari satu
 // state `transactions`, jadi transaksi baru langsung memperbarui seluruh
-// halaman. Data saat ini dummy (lihat `src/lib/finance.ts`).
+// halaman. Data diambil dari database lewat API /api/finance.
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { RemixiconComponentType } from "@remixicon/react";
 import {
   RiAddLine,
@@ -17,6 +24,7 @@ import {
   RiArrowUpLine,
   RiBox3Line,
   RiCheckLine,
+  RiFlagLine,
   RiMoneyDollarCircleLine,
   RiMore2Line,
   RiPercentLine,
@@ -26,10 +34,11 @@ import {
 } from "@remixicon/react";
 import AddTransactionDialog from "@/components/dashboard/add-transaction-dialog";
 import FinanceChart from "@/components/dashboard/finance-chart";
+import TargetDialog from "@/components/dashboard/target-dialog";
 import {
   breakdownExpenses,
   buildFinanceChartData,
-  createMockTransactions,
+  DAYS_PER_MONTH,
   FINANCE_PERIOD_OPTIONS,
   formatIDR,
   formatPercent,
@@ -223,17 +232,122 @@ function PnLRow({
 }
 
 /* ------------------------------------------------------------------ */
+/* Kartu target pendapatan (dapat diklik)                              */
+/* ------------------------------------------------------------------ */
+
+function TargetCard({
+  monthlyTarget,
+  periodIncome,
+  periodDays,
+  onOpen,
+}: {
+  monthlyTarget: number;
+  periodIncome: number;
+  periodDays: number;
+  onOpen: () => void;
+}) {
+  const periodTarget =
+    monthlyTarget > 0 ? (monthlyTarget * periodDays) / DAYS_PER_MONTH : 0;
+  const progressPct =
+    periodTarget > 0 ? Math.round((periodIncome / periodTarget) * 100) : 0;
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label="Atur target pendapatan"
+      className="cursor-pointer rounded-2xl border border-gray-200 bg-white text-left transition-colors hover:border-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+    >
+      <div className="flex items-start justify-between p-4 pb-3">
+        <span className="text-xs font-medium text-gray-600">
+          Target Pendapatan
+        </span>
+        <RiFlagLine size={20} className="text-gray-500" />
+      </div>
+      <div className="rounded-b-2xl rounded-xl border border-black hard-shadow bg-indigo-100 p-4">
+        <p className="font-mono text-xl font-bold tabular-nums text-indigo-900">
+          {monthlyTarget > 0 ? formatIDR(monthlyTarget) : "Belum diatur"}
+        </p>
+        {monthlyTarget > 0 ? (
+          <>
+            <p className="mt-1.5 font-mono text-xs text-indigo-700">
+              {progressPct}% tercapai periode ini
+            </p>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-indigo-200">
+              <div
+                className="h-full rounded-full bg-indigo-500"
+                style={{ width: `${Math.min(100, progressPct)}%` }}
+              />
+            </div>
+          </>
+        ) : (
+          <p className="mt-1.5 font-mono text-xs text-indigo-700">
+            Klik untuk mengatur target
+          </p>
+        )}
+      </div>
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Halaman                                                             */
 /* ------------------------------------------------------------------ */
 
 export default function FinancePage() {
-  // Nanti diganti dengan data asli dari API/DB — lihat src/lib/finance.ts.
-  const [transactions, setTransactions] = useState<FinanceTransaction[]>(() =>
-    createMockTransactions(),
-  );
+  const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [periodKey, setPeriodKey] = useState<FinancePeriodKey>("this-month");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [targetOpen, setTargetOpen] = useState(false);
+  const [monthlyTarget, setMonthlyTarget] = useState(0);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
+
+  // Muat transaksi dari database (API /api/finance).
+  // Dengarkan juga event "finance-updated" yang dikirim navbar saat
+  // transaksi baru dibuat lewat dialog "Buat Baru".
+  const loadTransactions = useCallback(() => {
+    fetch("/api/finance")
+      .then((res) => {
+        if (!res.ok) throw new Error("Gagal memuat transaksi");
+        return res.json();
+      })
+      .then((data) => {
+        setTransactions(data.transactions ?? []);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setTransactions([]);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    loadTransactions();
+    const handler = () => loadTransactions();
+    window.addEventListener("finance-updated", handler);
+    return () => window.removeEventListener("finance-updated", handler);
+  }, [loadTransactions]);
+
+  // Muat target pendapatan bulanan dari database.
+  const loadTarget = useCallback(() => {
+    fetch("/api/target")
+      .then((res) => {
+        if (!res.ok) throw new Error("Gagal memuat target");
+        return res.json();
+      })
+      .then((data) => {
+        setMonthlyTarget(Number(data.amount) || 0);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
+
+  useEffect(() => {
+    loadTarget();
+  }, [loadTarget]);
 
   const period = useMemo(() => getFinancePeriod(periodKey), [periodKey]);
   const summary = useMemo(
@@ -245,8 +359,8 @@ export default function FinancePage() {
     [transactions, period],
   );
   const chartData = useMemo(
-    () => buildFinanceChartData(transactions, period),
-    [transactions, period],
+    () => buildFinanceChartData(transactions, period, monthlyTarget),
+    [transactions, period, monthlyTarget],
   );
 
   const recentTransactions = useMemo(() => {
@@ -266,25 +380,67 @@ export default function FinancePage() {
   const grossProfit = summary.income - hpp;
   const operatingExpense = summary.expense - hpp;
 
+  // Panjang periode terpilih (hari) — dipakai kartu target untuk
+  // memprorata target bulanan.
+  const periodDays =
+    Math.round((period.end.getTime() - period.start.getTime()) / 86_400_000) +
+    1;
+
   const handlePeriodChange = (key: FinancePeriodKey) => {
     setPeriodKey(key);
     setShowAllTransactions(false);
   };
 
-  const handleAddTransaction = (input: NewFinanceTransaction) => {
-    setTransactions((prev) => [
-      {
-        id: crypto.randomUUID(),
-        type: input.type,
-        description: input.description,
-        amount: input.amount,
-        category: input.category,
-        date: input.date,
-        note: input.note,
-      },
-      ...prev,
-    ]);
-    setDialogOpen(false);
+  const handleSaveTarget = async (amount: number) => {
+    try {
+      const res = await fetch("/api/target", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || "Gagal menyimpan target");
+      }
+
+      const data = await res.json();
+      setMonthlyTarget(Number(data.amount) || 0);
+      setTargetOpen(false);
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error ? error.message : "Gagal menyimpan target",
+      );
+    }
+  };
+
+  const handleAddTransaction = async (input: NewFinanceTransaction) => {
+    try {
+      const res = await fetch("/api/finance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || "Gagal menyimpan transaksi");
+      }
+
+      const data = await res.json();
+      if (data.transaction) {
+        setTransactions((prev) => [data.transaction, ...prev]);
+      }
+      setDialogOpen(false);
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Gagal menyimpan transaksi",
+      );
+    }
   };
 
   const summaryCards: {
@@ -447,7 +603,7 @@ export default function FinancePage() {
         </div>
 
         {/* 2. Kartu ringkasan */}
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {summaryCards.map((card) => {
             const Icon = card.icon;
             const good = (card.change ?? 0) >= 0 === card.goodWhenUp;
@@ -495,6 +651,14 @@ export default function FinancePage() {
               </div>
             );
           })}
+
+          {/* Kartu Target Pendapatan — klik untuk mengatur target */}
+          <TargetCard
+            monthlyTarget={monthlyTarget}
+            periodIncome={summary.income}
+            periodDays={periodDays}
+            onOpen={() => setTargetOpen(true)}
+          />
         </div>
 
         {/* 3. Grafik Pendapatan vs Pengeluaran */}
@@ -637,7 +801,11 @@ export default function FinancePage() {
             )}
           </div>
 
-          {recentTransactions.length === 0 ? (
+          {loading ? (
+            <p className="px-5 py-8 text-center text-sm text-gray-500">
+              Memuat transaksi...
+            </p>
+          ) : recentTransactions.length === 0 ? (
             <p className="px-5 py-8 text-center text-sm text-gray-500">
               Belum ada transaksi pada periode ini.
             </p>
@@ -729,6 +897,14 @@ export default function FinancePage() {
           open
           onClose={() => setDialogOpen(false)}
           onSave={handleAddTransaction}
+        />
+      )}
+      {targetOpen && (
+        <TargetDialog
+          open
+          currentTarget={monthlyTarget}
+          onClose={() => setTargetOpen(false)}
+          onSave={handleSaveTarget}
         />
       )}
     </div>

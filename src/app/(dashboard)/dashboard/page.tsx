@@ -1,5 +1,8 @@
+import { auth } from "@clerk/nextjs/server";
 import SalesChart from "@/components/dashboard/sales-chart";
 import PleaseReveal from "@/components/ui/please-reveal";
+import { prisma } from "@/lib/prisma";
+import { formatIDR } from "@/lib/finance";
 import {
   RiArrowRightLine,
   RiArrowRightUpLine,
@@ -13,45 +16,151 @@ type StatCard = {
   label: string;
   value: string;
   change: string;
+  /** Persentase perubahan; null = belum ada data pembanding. */
+  changeUp: number | null;
   bg: string;
   valueColor: string;
   icon: RemixiconComponentType;
 };
 
-const stats: StatCard[] = [
-  {
-    label: "Total Pendapatan",
-    value: "Rp1.992.300,00",
-    change: "+8% dari bulan lalu",
-    bg: "bg-blue-100",
-    valueColor: "text-blue-900",
-    icon: RiCurrencyLine,
-  },
-  {
-    label: "Pendapatan Bersih",
-    value: "Rp992.300,00",
-    change: "+8% dari bulan lalu",
-    bg: "bg-amber-100",
-    valueColor: "text-amber-900",
-    icon: RiMoneyDollarCircleLine,
-  },
-  {
-    label: "Total Pengunjung",
-    value: "199",
-    change: "+8% dari bulan lalu",
-    bg: "bg-emerald-100",
-    valueColor: "text-emerald-900",
-    icon: RiGroup3Line,
-  },
-];
+/** Persentase perubahan (bulat) — null bila tidak ada pembanding. */
+function pctChange(current: number, previous: number): number | null {
+  if (previous === 0) return null;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+function formatRp(value: number): string {
+  return value >= 0 ? formatIDR(value) : `-${formatIDR(Math.abs(value))}`;
+}
 
 export default async function Dashboard({
   searchParams,
 }: {
   searchParams: Promise<{ month?: string }>;
 }) {
+  const { userId } = await auth();
   const resolvedParams = await searchParams;
-  const currentMonth = resolvedParams?.month || "Agustus";
+  const now = new Date();
+
+  // Label bulan untuk tampilan; data selalu dihitung untuk bulan berjalan.
+  const currentMonth =
+    resolvedParams?.month ||
+    now.toLocaleDateString("id-ID", { month: "long" });
+
+  // Rentang bulan berjalan & bulan lalu (UTC midnight agar konsisten
+  // dengan kolom DATE TransaksiKeuangan).
+  const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
+  const nextMonthStart = new Date(
+    Date.UTC(now.getFullYear(), now.getMonth() + 1, 1),
+  );
+  const prevMonthStart = new Date(
+    Date.UTC(now.getFullYear(), now.getMonth() - 1, 1),
+  );
+
+  let income = 0;
+  let prevIncome = 0;
+  let expense = 0;
+  let prevExpense = 0;
+  let salesByDay: { date: string; total: number }[] = [];
+  let monthlyTarget = 0;
+
+  if (userId) {
+    const [
+      incomeAgg,
+      prevIncomeAgg,
+      expenseAgg,
+      prevExpenseAgg,
+      sales,
+      targetRow,
+    ] = await Promise.all([
+      prisma.penjualan.aggregate({
+        where: { userId, createdAt: { gte: monthStart, lt: nextMonthStart } },
+        _sum: { total: true },
+      }),
+      prisma.penjualan.aggregate({
+        where: { userId, createdAt: { gte: prevMonthStart, lt: monthStart } },
+        _sum: { total: true },
+      }),
+      prisma.transaksiKeuangan.aggregate({
+        where: {
+          userId,
+          type: "expense",
+          date: { gte: monthStart, lt: nextMonthStart },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.transaksiKeuangan.aggregate({
+        where: {
+          userId,
+          type: "expense",
+          date: { gte: prevMonthStart, lt: monthStart },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.penjualan.findMany({
+        where: { userId },
+        select: { createdAt: true, total: true },
+      }),
+      prisma.targetPendapatan.findUnique({ where: { userId } }),
+    ]);
+
+    income = incomeAgg._sum.total ?? 0;
+    prevIncome = prevIncomeAgg._sum.total ?? 0;
+    expense = expenseAgg._sum.amount ?? 0;
+    prevExpense = prevExpenseAgg._sum.amount ?? 0;
+    monthlyTarget = targetRow?.amount ?? 0;
+
+    // Total penjualan per tanggal untuk grafik (yyyy-mm-dd).
+    const daily = new Map<string, number>();
+    for (const sale of sales) {
+      const key = sale.createdAt.toISOString().slice(0, 10);
+      daily.set(key, (daily.get(key) ?? 0) + sale.total);
+    }
+    salesByDay = Array.from(daily.entries()).map(([date, total]) => ({
+      date,
+      total,
+    }));
+  }
+
+  const net = income - expense;
+  const incomeChange = pctChange(income, prevIncome);
+  const netChange = pctChange(net, prevIncome - prevExpense);
+
+  const changeText = (change: number | null) =>
+    change === null
+      ? "Belum ada data bulan lalu"
+      : `${change >= 0 ? "+" : ""}${change}% dari bulan lalu`;
+
+  const stats: StatCard[] = [
+    {
+      label: "Total Pendapatan",
+      value: formatRp(income),
+      change: changeText(incomeChange),
+      changeUp: incomeChange,
+      bg: "bg-blue-100",
+      valueColor: "text-blue-900",
+      icon: RiCurrencyLine,
+    },
+    {
+      label: "Pendapatan Bersih",
+      value: formatRp(net),
+      change: changeText(netChange),
+      changeUp: netChange,
+      bg: "bg-amber-100",
+      valueColor: "text-amber-900",
+      icon: RiMoneyDollarCircleLine,
+    },
+    {
+      // Belum ada sumber data pengunjung — masih tampilan statis.
+      label: "Total Pengunjung",
+      value: "199",
+      change: "+8% dari bulan lalu",
+      changeUp: 8,
+      bg: "bg-emerald-100",
+      valueColor: "text-emerald-900",
+      icon: RiGroup3Line,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -87,10 +196,22 @@ export default async function Dashboard({
                     >
                       {stat.value}
                     </p>
-                    <p className="mt-1 flex items-center gap-1 text-xs font-mono text-gray-600">
+                    <p
+                      className={`mt-1 flex items-center gap-1 text-xs font-mono ${
+                        stat.changeUp === null
+                          ? "text-gray-600"
+                          : stat.changeUp >= 0
+                            ? "text-green-600"
+                            : "text-red-500"
+                      }`}
+                    >
                       <RiArrowRightUpLine
                         size={14}
-                        className="text-green-600"
+                        className={
+                          stat.changeUp !== null && stat.changeUp < 0
+                            ? "text-red-500"
+                            : "text-green-600"
+                        }
                       />
                       {stat.change}
                     </p>
@@ -128,8 +249,12 @@ export default async function Dashboard({
               <p className="text-xs text-gray-500">
                 Total unit terjual per item
               </p>
-              {/*  Tampilkan chart penjualan dengan bulan yang dipilih */}
-              <SalesChart month={currentMonth} />
+              {/*  Tampilkan chart penjualan dengan data dari database */}
+              <SalesChart
+                month={currentMonth}
+                sales={salesByDay}
+                monthlyTarget={monthlyTarget}
+              />
             </div>
           </div>
         </PleaseReveal>

@@ -1,14 +1,21 @@
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma"; // Sesuaikan path prisma client kamu
 
 export const revalidate = 0; // Memastikan data selalu segar / tidak di-cache
 
 export default async function ProductPage() {
-  // 1. Ambil data produk dari database Prisma
-  const products = await prisma.produk.findMany({
-    orderBy: {
-      createdAt: "desc", // Produk terbaru di atas
-    },
-  });
+  const { userId } = await auth();
+
+  // 1. Ambil data produk milik user yang sedang login
+  const products = userId
+    ? await prisma.produk.findMany({
+        where: { userId },
+        include: { kategori: true },
+        orderBy: {
+          createdAt: "desc", // Produk terbaru di atas
+        },
+      })
+    : [];
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
@@ -45,9 +52,9 @@ export default async function ProductPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-gray-900">{item.nama}</h3>
-                      {item.kategoriId && (
+                      {item.kategori && (
                         <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
-                        {item.kategoriId}
+                        {item.kategori.nama}
                         </span>
                       )}
                   </div>

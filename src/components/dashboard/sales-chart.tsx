@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   AreaChart,
@@ -11,6 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from '@remixicon/react';
+import { proratedTarget } from '@/lib/finance';
 
 type PeriodKey = '30d' | '3m' | '3y';
 
@@ -24,7 +26,6 @@ interface DataPoint {
 interface PeriodConfig {
   key: PeriodKey;
   label: string;
-  build: () => DataPoint[];
 }
 
 interface Stats {
@@ -34,92 +35,100 @@ interface Stats {
 }
 
 interface SalesChartProps {
+  /** Label bulan untuk judul, mis. "Agustus". */
   month?: string;
+  /** Total penjualan per tanggal (yyyy-mm-dd) dari database. */
+  sales: { date: string; total: number }[];
+  /** Target pendapatan bulanan dari database (0 = belum diatur). */
+  monthlyTarget?: number;
 }
 
 // ---------------------------------------------------------------------------
-// Data dummy
+// Util tanggal & agregasi data asli dari database
 // ---------------------------------------------------------------------------
-function seededRandom(seed: number): () => number {
-  let s = seed;
-  return () => {
-    s = (s * 9301 + 49297) % 233280;
-    return s / 233280;
-  };
-}
-
-function generateDaily(days: number): DataPoint[] {
-  const rand = seededRandom(42);
-  const out: DataPoint[] = [];
-  const today = new Date();
-  let base = 8_000_000;
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const weekend = d.getDay() === 0 || d.getDay() === 6;
-    const noise = (rand() - 0.5) * 3_000_000;
-    base += (rand() - 0.45) * 250_000;
-    const revenue = Math.max(1_000_000, base + noise + (weekend ? 1_500_000 : 0));
-    out.push({
-      label: d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
-      fullLabel: d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }),
-      revenue: Math.round(revenue),
-      target: Math.round(base + 2_000_000),
-    });
-  }
-  return out;
-}
-
-function generateWeekly(weeks: number): DataPoint[] {
-  const rand = seededRandom(7);
-  const out: DataPoint[] = [];
-  const today = new Date();
-  let base = 55_000_000;
-  for (let i = weeks - 1; i >= 0; i--) {
-    const end = new Date(today);
-    end.setDate(end.getDate() - i * 7);
-    const start = new Date(end);
-    start.setDate(start.getDate() - 6);
-    base += (rand() - 0.4) * 4_000_000;
-    const revenue = Math.max(10_000_000, base + (rand() - 0.5) * 8_000_000);
-    out.push({
-      label: `${start.getDate()}–${end.getDate()} ${end.toLocaleDateString('id-ID', { month: 'short' })}`,
-      fullLabel: `${start.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })} – ${end.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}`,
-      revenue: Math.round(revenue),
-      target: Math.round(base + 6_000_000),
-    });
-  }
-  return out;
-}
-
-function generateMonthly(months: number): DataPoint[] {
-  const rand = seededRandom(123);
-  const out: DataPoint[] = [];
-  const today = new Date();
-  let base = 220_000_000;
-  for (let i = months - 1; i >= 0; i--) {
-    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const seasonal = Math.sin((d.getMonth() / 12) * Math.PI * 2) * 20_000_000;
-    base += (rand() - 0.35) * 12_000_000;
-    const revenue = Math.max(50_000_000, base + seasonal + (rand() - 0.5) * 15_000_000);
-    out.push({
-      label: d.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }),
-      fullLabel: d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }),
-      revenue: Math.round(revenue),
-      target: Math.round(base + seasonal + 25_000_000),
-    });
-  }
-  return out;
-}
 
 const PERIODS: PeriodConfig[] = [
-  { key: '30d', label: '30 hari terakhir', build: () => generateDaily(30) },
-  { key: '3m', label: '3 bulan terakhir', build: () => generateWeekly(13) },
-  { key: '3y', label: '3 tahun terakhir', build: () => generateMonthly(36) },
+  { key: '30d', label: '30 hari terakhir' },
+  { key: '3m', label: '3 bulan terakhir' },
+  { key: '3y', label: '3 tahun terakhir' },
 ];
 
+function toISODate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Ubah data penjualan asli menjadi titik grafik untuk periode terpilih.
+ * Bucket tanpa penjualan diisi 0; garis target diprorata per bucket.
+ */
+function buildPoints(
+  period: PeriodKey,
+  sales: { date: string; total: number }[],
+  monthlyTarget: number,
+): DataPoint[] {
+  const totals = new Map(sales.map((s) => [s.date, s.total]));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const points: DataPoint[] = [];
+
+  if (period === '30d') {
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const iso = toISODate(d);
+      points.push({
+        label: d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+        fullLabel: d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }),
+        revenue: totals.get(iso) ?? 0,
+        target: proratedTarget(monthlyTarget, 'day'),
+      });
+    }
+  } else if (period === '3m') {
+    for (let i = 12; i >= 0; i--) {
+      const end = new Date(today);
+      end.setDate(end.getDate() - i * 7);
+      const start = new Date(end);
+      start.setDate(start.getDate() - 6);
+
+      let revenue = 0;
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        revenue += totals.get(toISODate(d)) ?? 0;
+      }
+
+      points.push({
+        label: `${start.getDate()}–${end.getDate()} ${end.toLocaleDateString('id-ID', { month: 'short' })}`,
+        fullLabel: `${start.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })} – ${end.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}`,
+        revenue,
+        target: proratedTarget(monthlyTarget, 'week'),
+      });
+    }
+  } else {
+    for (let i = 35; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthPrefix = toISODate(d).slice(0, 7);
+
+      let revenue = 0;
+      for (const [iso, total] of totals) {
+        if (iso.startsWith(monthPrefix)) revenue += total;
+      }
+
+      points.push({
+        label: d.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }),
+        fullLabel: d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }),
+        revenue,
+        target: proratedTarget(monthlyTarget, 'month'),
+      });
+    }
+  }
+
+  return points;
+}
+
 // ---------------------------------------------------------------------------
-// Util
+// Util format
 // ---------------------------------------------------------------------------
 const formatCompact = (v: number): string => {
   if (v >= 1_000_000_000) return `Rp${(v / 1_000_000_000).toFixed(1)}M`;
@@ -160,7 +169,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
           <span className="ml-auto font-mono font-medium text-slate-800">{formatFull(revenue)}</span>
         </div>
       )}
-      {target != null && (
+      {target != null && target > 0 && (
         <div className="flex items-center gap-2 text-sm mt-1">
           <span className="h-2 w-2 rounded-full border-2 border-amber-500 bg-white" />
           <span className="text-slate-500">Target</span>
@@ -241,13 +250,15 @@ function PeriodDropdown({ value, onChange }: PeriodDropdownProps) {
 // ---------------------------------------------------------------------------
 // Komponen utama
 // ---------------------------------------------------------------------------
-export default function SalesChart({ month = "Agustus" }: SalesChartProps) {
+export default function SalesChart({ month = "Agustus", sales = [], monthlyTarget = 0 }: SalesChartProps) {
   const [period, setPeriod] = useState<PeriodKey>('30d');
 
   const data = useMemo<DataPoint[]>(
-    () => PERIODS.find((p) => p.key === period)!.build(),
-    [period]
+    () => buildPoints(period, sales, monthlyTarget),
+    [period, sales, monthlyTarget]
   );
+
+  const hasTarget = monthlyTarget > 0;
 
   const stats = useMemo<Stats>(() => {
     const total = data.reduce((s, d) => s + d.revenue, 0);
@@ -294,9 +305,11 @@ export default function SalesChart({ month = "Agustus" }: SalesChartProps) {
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-teal-600" /> Penjualan
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full border-2 border-amber-500 bg-white" /> Target
-        </span>
+        {hasTarget && (
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full border-2 border-amber-500 bg-white" /> Target
+          </span>
+        )}
         <span className="text-slate-400 ml-auto">
           Rata-rata: <span className="font-mono text-slate-600">{formatCompact(stats.avg)}</span>
         </span>
@@ -338,15 +351,17 @@ export default function SalesChart({ month = "Agustus" }: SalesChartProps) {
               dot={false}
               activeDot={{ r: 5, fill: '#0d9488', stroke: '#fff', strokeWidth: 2 }}
             />
-            <Line
-              type="monotone"
-              dataKey="target"
-              stroke="#d97706"
-              strokeWidth={1.5}
-              strokeDasharray="4 4"
-              dot={false}
-              activeDot={{ r: 4, fill: '#d97706', stroke: '#fff', strokeWidth: 2 }}
-            />
+            {hasTarget && (
+              <Line
+                type="monotone"
+                dataKey="target"
+                stroke="#d97706"
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                dot={false}
+                activeDot={{ r: 4, fill: '#d97706', stroke: '#fff', strokeWidth: 2 }}
+              />
+            )}
           </AreaChart>
         </ResponsiveContainer>
       </div>

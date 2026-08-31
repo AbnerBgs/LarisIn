@@ -22,7 +22,8 @@ export default function PleasePop({ isOpen, onClose, children, title, style = "h
         setIsVisible(true);
       });
     } else {
-      setIsVisible(false);
+      // Reset lewat rAF supaya tidak memanggil setState sinkron di dalam effect.
+      requestAnimationFrame(() => setIsVisible(false));
       document.body.style.overflow = 'unset';
     }
     return () => {

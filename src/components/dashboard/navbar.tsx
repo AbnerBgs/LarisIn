@@ -293,12 +293,33 @@ export default function Navbar() {
       <CreateNewDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        onSaveTransaction={() => {
-          // TODO: hubungkan ke penyimpanan transaksi global.
-          setCreateOpen(false);
+        onSaveTransaction={async (input) => {
+          try {
+            const response = await fetch("/api/finance", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(input),
+            });
+
+            if (!response.ok) {
+              const err = await response.json().catch(() => null);
+              throw new Error(err?.error || "Gagal menyimpan transaksi");
+            }
+
+            // Beri tahu halaman Keuangan (jika sedang terbuka) untuk muat ulang.
+            window.dispatchEvent(new CustomEvent("finance-updated"));
+            setCreateOpen(false);
+          } catch (error) {
+            console.error(error);
+            alert(
+              error instanceof Error
+                ? error.message
+                : "Gagal menyimpan transaksi",
+            );
+          }
         }}
         onSaveProduct={() => {
-          // TODO: hubungkan ke penyimpanan produk global.
+          // Produk sudah disimpan ke API di dalam ProductForm.
           setCreateOpen(false);
         }}
       />

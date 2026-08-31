@@ -15,6 +15,15 @@ import {
   RiTimeLine, 
 } from "@remixicon/react";
 
+// Kunci kategori harus sama dengan CATEGORY_META di halaman /cek-umkm.
+const UMKM_CATEGORIES = [
+  { value: "kuliner", label: "Kuliner" },
+  { value: "fashion", label: "Fashion" },
+  { value: "kerajinan", label: "Kerajinan" },
+  { value: "jasa", label: "Jasa" },
+  { value: "pertanian", label: "Pertanian" },
+];
+
 export default function EditProfile() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -22,7 +31,8 @@ export default function EditProfile() {
 
   // States Utama
   const [name, setName] = useState<string>("Nama Usaha");
-  const [openHours, setOpenHours] = useState<string>(""); 
+  const [category, setCategory] = useState<string>("");
+  const [openHours, setOpenHours] = useState<string>("");
   const [street, setStreet] = useState<string>("");
   const [district, setDistrict] = useState<string>("");
   const [city, setCity] = useState<string>("");
@@ -38,7 +48,8 @@ export default function EditProfile() {
 
   // Draft States (untuk form edit)
   const [draftName, setDraftName] = useState<string>("");
-  const [draftOpenHours, setDraftOpenHours] = useState<string>(""); 
+  const [draftCategory, setDraftCategory] = useState<string>("");
+  const [draftOpenHours, setDraftOpenHours] = useState<string>("");
   const [draftStreet, setDraftStreet] = useState<string>("");
   const [draftDistrict, setDraftDistrict] = useState<string>("");
   const [draftCity, setDraftCity] = useState<string>("");
@@ -59,7 +70,8 @@ export default function EditProfile() {
         if (res.ok) {
           const data = await res.json();
           setName(data.name || "Nama Usaha");
-          setOpenHours(data.openHours || ""); 
+          setCategory(data.category || "");
+          setOpenHours(data.openHours || "");
           setStreet(data.street || "");
           setDistrict(data.district || "");
           setCity(data.city || "");
@@ -87,7 +99,8 @@ export default function EditProfile() {
 
   const startEdit = (): void => {
     setDraftName(name);
-    setDraftOpenHours(openHours); 
+    setDraftCategory(category);
+    setDraftOpenHours(openHours);
     setDraftStreet(street);
     setDraftDistrict(district);
     setDraftCity(city);
@@ -117,7 +130,8 @@ export default function EditProfile() {
 
     const payload = {
       name: draftName.trim(),
-      openHours: draftOpenHours.trim(), 
+      category: draftCategory,
+      openHours: draftOpenHours.trim(),
       street: draftStreet.trim(),
       district: draftDistrict.trim(),
       city: draftCity.trim(),
@@ -140,7 +154,9 @@ export default function EditProfile() {
 
       if (res.ok) {
         setName(payload.name);
-        setOpenHours(payload.openHours); 
+        setCategory(payload.category);
+        setOpenHours(payload.openHours);
+        setStreet(payload.street);
         setDistrict(payload.district);
         setCity(payload.city);
         setProvince(payload.province);
@@ -200,6 +216,12 @@ export default function EditProfile() {
                 <h2 className="truncate text-lg font-bold text-gray-900 sm:text-xl">
                   {name}
                 </h2>
+                {category && (
+                  <p className="mt-0.5 text-xs font-medium text-blue-500">
+                    {UMKM_CATEGORIES.find((c) => c.value === category)?.label ??
+                      category}
+                  </p>
+                )}
               </div>
             </div>
             {!isEditing && (
@@ -232,6 +254,22 @@ export default function EditProfile() {
                     onChange={(event) => setDraftName(event.target.value)}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
                   />
+                </label>
+
+                <label className="block text-sm font-medium text-slate-600">
+                  Kategori Usaha
+                  <select
+                    value={draftCategory}
+                    onChange={(event) => setDraftCategory(event.target.value)}
+                    className="mt-1 w-full cursor-pointer rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                  >
+                    <option value="">Pilih kategori...</option>
+                    {UMKM_CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
                 </label>
 
                 {/* 👈 Input Jam Operasional / Jam Buka */}

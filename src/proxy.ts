@@ -3,7 +3,13 @@ import { clerkMiddleware } from '@clerk/nextjs/server';
 export default clerkMiddleware(async (auth, req) => {
   const { pathname } = req.nextUrl;
 
-  if (pathname.startsWith('/dashboard')) {
+  // Halaman dashboard dan semua API dilindungi login Clerk,
+  // kecuali /api/umkm yang merupakan direktori UMKM publik.
+  const isProtectedPage = pathname.startsWith('/dashboard');
+  const isProtectedApi =
+    pathname.startsWith('/api') && !pathname.startsWith('/api/umkm');
+
+  if (isProtectedPage || isProtectedApi) {
     await auth.protect();
   }
 });

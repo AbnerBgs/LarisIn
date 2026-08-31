@@ -3,19 +3,18 @@
 import NavbarLanding from "@/components/landing/navbar";
 import { OriginButton } from "@/components/ui/origin-button";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function NotFound() {
   const [count, setCount] = useState(400);
-
-  let maxCount = 409;
+  const maxCountRef = useRef(409);
 
   useEffect(() => {
     let current = 400;
     const interval = setInterval(() => {
       setCount(current);
-      if (current >= maxCount) {
-        maxCount = 404;
+      if (current >= maxCountRef.current) {
+        maxCountRef.current = 404;
         current -= 1;
 
         if (current < 404) {

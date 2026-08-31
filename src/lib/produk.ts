@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 
-// GET
-export async function getProduk() {
+// GET — produk milik satu user (scope dari sesi Clerk).
+export async function getProduk(userId: string) {
   const produk = await prisma.produk.findMany({
+    where: { userId },
     include: { kategori: true },
     orderBy: { createdAt: "desc" },
   });
@@ -18,16 +19,28 @@ export async function getProduk() {
   }));
 }
 
-// POST
-export async function createProduk(data: {
-  nama: string;
-  harga: number;
-  stok: number;
-  deskripsi?: string;
-  gambarUrl?: string;
-  kategoriId?: string;
-}) {
-  const payload: any = {
+// POST — buat produk milik satu user.
+export async function createProduk(
+  userId: string,
+  data: {
+    nama: string;
+    harga: number;
+    stok: number;
+    deskripsi?: string;
+    gambarUrl?: string;
+    kategoriId?: string;
+  },
+) {
+  const payload: {
+    userId: string;
+    nama: string;
+    harga: number;
+    stok: number;
+    deskripsi: string | null;
+    gambarUrl: string | null;
+    kategoriId?: string;
+  } = {
+    userId,
     nama: data.nama,
     harga: Number(data.harga),
     stok: Number(data.stok),

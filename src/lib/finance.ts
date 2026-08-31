@@ -327,11 +327,37 @@ export interface FinanceChartPoint {
   pendapatan: number;
   pengeluaran: number;
   laba: number;
+  /** Target pendapatan pada titik ini (proporsional dari target bulanan). */
+  target: number;
+}
+
+/* ------------------------------------------------------------------ */
+/* Target pendapatan — dibagi proporsional per bucket grafik.          */
+/* Dipakai konsisten di dashboard (SalesChart) dan keuangan.           */
+/* ------------------------------------------------------------------ */
+
+/** Rata-rata hari per bulan untuk membagi target bulanan. */
+export const DAYS_PER_MONTH = 30.44;
+
+/**
+ * Porsi target bulanan untuk satu bucket grafik:
+ * - day   → target per hari
+ * - week  → target per minggu
+ * - month → target bulanan penuh
+ */
+export function proratedTarget(
+  monthlyTarget: number,
+  bucket: ChartBucket,
+): number {
+  const factor =
+    bucket === "day" ? 1 / DAYS_PER_MONTH : bucket === "week" ? 7 / DAYS_PER_MONTH : 1;
+  return Math.round(monthlyTarget * factor);
 }
 
 export function buildFinanceChartData(
   transactions: FinanceTransaction[],
   period: FinancePeriod,
+  monthlyTarget = 0,
 ): FinanceChartPoint[] {
   const points: FinanceChartPoint[] = [];
   const bucketRanges: { start: string; end: string; index: number }[] = [];
@@ -355,6 +381,7 @@ export function buildFinanceChartData(
         pendapatan: 0,
         pengeluaran: 0,
         laba: 0,
+        target: proratedTarget(monthlyTarget, "day"),
       });
     }
   } else if (period.bucket === "week") {
@@ -374,6 +401,7 @@ export function buildFinanceChartData(
         pendapatan: 0,
         pengeluaran: 0,
         laba: 0,
+        target: proratedTarget(monthlyTarget, "week"),
       });
       weekStart = addDays(weekStart, 7);
     }
@@ -404,6 +432,7 @@ export function buildFinanceChartData(
         pendapatan: 0,
         pengeluaran: 0,
         laba: 0,
+        target: proratedTarget(monthlyTarget, "month"),
       });
       monthStart = new Date(
         monthStart.getFullYear(),

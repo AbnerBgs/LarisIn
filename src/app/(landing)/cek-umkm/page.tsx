@@ -172,67 +172,16 @@ export default function CekUmkmPage() {
   useEffect(() => {
     async function fetchUmkmData() {
       try {
-        const resProfile = await fetch("/api/profileUmkm");
-        let profileData = null;
-        if (resProfile.ok) {
-          profileData = await resProfile.json();
+        // Direktori publik: semua UMKM yang sudah dipublikasikan (isPublished).
+        const res = await fetch("/api/umkm");
+        if (!res.ok) {
+          throw new Error("Gagal mengambil data UMKM");
         }
-
-        let productsData: CatalogProduct[] = [];
-        try {
-          const resProducts = await fetch("/api/product");
-          if (resProducts.ok) {
-            const rawProducts = await resProducts.json();
-
-            const list = Array.isArray(rawProducts)
-              ? rawProducts
-              : rawProducts.data || rawProducts.products || [];
-
-            productsData = list.map((p: any) => ({
-              id: p.id || p._id,
-              name: p.nama || p.name || "Tanpa Nama",
-              price: Number(p.harga || p.price || 0),
-              imageUrl: p.gambarUrl || p.image || p.imageUrl || "",
-            }));
-          }
-        } catch (pErr) {
-          console.error("Gagal mengambil produk:", pErr);
-        }
-
-        if (profileData) {
-          const parsedJobs: JobPosting[] = profileData.jobsText
-            ? profileData.jobsText
-                .split("\n")
-                .filter((line: string) => line.trim() !== "")
-                .map((line: string) => ({
-                  title: line.trim(),
-                  type: "Penuh Waktu",
-                  salary: "Kompetitif",
-                }))
-            : [];
-
-          const formattedData: Umkm = {
-            id: profileData.id || "umkm-1",
-            name: profileData.name || profileData.namaUsaha || "Nama Usaha",
-            category: (profileData.category as CategoryKey) || "jasa",
-            city: profileData.city || "Kota Tidak Diketahui",
-            area:
-              [profileData.street, profileData.district]
-                .filter(Boolean)
-                .join(", ") || profileData.city,
-            rating: 5.0,
-            // 👈 Membaca openHours asli dari profil data (tanpa fallback "08.00 - 17.00")
-            openHours: profileData.openHours || "",
-            whatsapp: profileData.whatsapp || "6281234567890",
-            description: profileData.description || "",
-            products: productsData,
-            jobs: parsedJobs,
-          };
-
-          setUmkmList([formattedData]);
-        }
+        const data = await res.json();
+        setUmkmList(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Gagal mengambil data UMKM dari DB", err);
+        setUmkmList([]);
       }
     }
 

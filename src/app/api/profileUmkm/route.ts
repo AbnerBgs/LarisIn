@@ -1,69 +1,80 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { ensureUser, getSessionUserId, unauthorized } from "@/lib/user";
 
+// GET: profil UMKM milik user yang sedang login (auto-create placeholder).
 export async function GET() {
-  try {
-    let profile = await prisma.profile.findUnique({
-      where: { id: "default-profile" },
-    });
+  const userId = await getSessionUserId();
+  if (!userId) return unauthorized();
 
+  try {
+    await ensureUser(userId);
+
+    let profile = await prisma.umkmProfile.findUnique({ where: { userId } });
     if (!profile) {
-      profile = await prisma.profile.create({
-        data: { id: "default-profile", name: "Nama Usaha" },
+      profile = await prisma.umkmProfile.create({
+        data: { userId, name: "Nama Usaha" },
       });
     }
 
     return NextResponse.json(profile);
-  } catch (error: any) {
-    console.error("Gagal mengambil profil:", error);
+  } catch (error) {
+    console.error("GET /api/profileUmkm error:", error);
     return NextResponse.json(
       { error: "Gagal mengambil profil" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-// PUT: Update profil ke database
+// PUT: update profil UMKM milik user yang sedang login.
+// Setelah disimpan, profil dipublikasikan ke direktori /cek-umkm.
 export async function PUT(request: Request) {
+  const userId = await getSessionUserId();
+  if (!userId) return unauthorized();
+
   try {
     const body = await request.json();
 
+    if (!body.name || !body.name.trim()) {
+      return NextResponse.json(
+        { error: "Nama usaha tidak boleh kosong" },
+        { status: 400 },
+      );
+    }
+
     const profileData = {
-      name: body.name || "Nama Usaha",
+      name: String(body.name).trim(),
       category: body.category ?? "",
       street: body.street ?? "",
       district: body.district ?? "",
       city: body.city ?? "",
       province: body.province ?? "",
       postalCode: body.postalCode ?? "",
-      openHours: body.openHours ?? "", // 👈 KUNCI: Tambahkan ini agar tersimpan ke DB
+      openHours: body.openHours ?? "",
       whatsapp: body.whatsapp ?? "",
       jobsText: body.jobsText ?? "",
       linkInsta: body.linkInsta ?? "",
       linkFb: body.linkFb ?? "",
       linkWeb: body.linkWeb ?? "",
       description: body.description ?? "",
+      isPublished: true,
     };
 
-    const updatedProfile = await prisma.profile.upsert({
-      where: { id: "default-profile" },
+    await ensureUser(userId);
+
+    const updatedProfile = await prisma.umkmProfile.upsert({
+      where: { userId },
       update: profileData,
-      create: {
-        id: "default-profile",
-        ...profileData,
-      },
+      create: { userId, ...profileData },
     });
 
     return NextResponse.json(updatedProfile);
-  } catch (error: any) {
-    console.error("Error updating profile (API Error):", error);
-
+  } catch (error) {
+    console.error("PUT /api/profileUmkm error:", error);
     return NextResponse.json(
-      {
-        error: "Gagal menyimpan profil",
-        details: error?.message || String(error),
-      },
-      { status: 500 }
+      { error: "Gagal menyimpan profil", details: String(error) },
+      { status: 500 },
     );
   }
 }
