@@ -4,8 +4,9 @@
 // Shell klien halaman Produk: pencarian, daftar, detail, edit, dan hapus.
 // Produk tanpa gambar menampilkan ikon RemixIcon sesuai kategorinya.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import CreateNewDialog from "@/components/dashboard/create-new-dialog";
 import {
   RiArmchairLine,
   RiBowlLine,
@@ -17,6 +18,7 @@ import {
   RiPencilLine,
   RiSearchLine,
   RiToolsLine,
+  RiAddLine,
   type RemixiconComponentType,
 } from "@remixicon/react";
 import PleasePop from "@/components/ui/please-pop";
@@ -223,13 +225,43 @@ export default function ProdukClient({
     }
   };
 
+  const [createOpen, setCreateOpen] = useState(false);
+   useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.altKey && e.key === "n") {
+          e.preventDefault();
+          setCreateOpen(true);
+        }
+      };
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <section className="mx-auto max-w-3xl px-4 py-6 md:px-8 md:py-8">
         <div>
+          <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
             Produk
           </h1>
+          <div className="px-4 pt-4">
+          <button
+            type="button"
+            onClick={() => setCreateOpen(true)}
+            className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <RiAddLine size={16} />
+              Tambah Product
+            </span>
+
+            <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-400">
+              Alt + N
+            </kbd>
+          </button>
+        </div>
+          </div>
           <p className="mt-1 text-sm text-gray-500">
             {filteredProducts.length} produk ditemukan
           </p>
@@ -421,6 +453,15 @@ export default function ProdukClient({
           />
         )}
       </PleasePop>
+
+      <CreateNewDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onSaveProduct={() => {
+          // Produk sudah disimpan ke API di dalam ProductForm.
+          setCreateOpen(false);
+        }}
+      />
     </div>
   );
 }
