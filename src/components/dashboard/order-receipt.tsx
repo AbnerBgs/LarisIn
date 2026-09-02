@@ -22,7 +22,7 @@ export default function OrderReceipt({
   orderNumber,
   paymentType,
   items,
-  businessName = "Toko bang dep",
+  businessName = "Nama Usaha",
   taxRate = 0.11,
   onPrint,
 }: OrderReceiptProps) {
@@ -167,6 +167,19 @@ export default function OrderReceipt({
             </div>
           </div>
         ))}
+        <div className="border-t border-dashed border-black my-2" />
+        <div className="space-y-1 text-xs">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>{formatPrice(subtotal)}</span>
+          </div>
+          {taxRate > 0 && (
+            <div className="flex justify-between">
+              <span>Pajak ({Math.round(taxRate * 100)}%)</span>
+              <span>{formatPrice(tax)}</span>
+            </div>
+          )}
+        </div>
         <div className="border-t border-dashed border-black my-2" />
         <div className="flex justify-between font-bold">
           <span>Total</span>

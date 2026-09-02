@@ -1,9 +1,5 @@
 "use client";
 
-// app/produk/produk-client.tsx
-// Shell klien halaman Produk: pencarian, daftar, detail, edit, dan hapus.
-// Produk tanpa gambar menampilkan ikon RemixIcon sesuai kategorinya.
-
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import CreateNewDialog from "@/components/dashboard/create-new-dialog";
@@ -36,7 +32,6 @@ interface Product {
   stock: number;
 }
 
-// Ikon fallback per kategori saat produk tidak punya gambar.
 const CATEGORY_ICONS: Record<string, RemixiconComponentType> = {
   Makanan: RiBowlLine,
   Minuman: RiCupLine,
@@ -57,9 +52,7 @@ function CategoryIcon({
 }) {
   const Icon = CATEGORY_ICONS[category] ?? RiImageLine;
   return (
-    <div
-      className={`flex items-center justify-center ${className ?? ""}`}
-    >
+    <div className={`flex items-center justify-center ${className ?? ""}`}>
       <Icon size={iconSize} />
     </div>
   );
@@ -110,8 +103,6 @@ export default function ProdukClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
-  // Sinkronkan dengan data server, mis. setelah router.refresh() usai
-  // menambah produk lewat dialog "Buat Baru" (pola "adjust state during render").
   const [prevInitialProducts, setPrevInitialProducts] =
     useState(initialProducts);
   if (prevInitialProducts !== initialProducts) {
@@ -196,8 +187,6 @@ export default function ProdukClient({
   };
 
   const handleDelete = async (product: Product) => {
-    if (!window.confirm(`Hapus produk "${product.name}"?`)) return;
-
     try {
       const response = await fetch(`/api/product/${product.id}`, {
         method: "DELETE",
@@ -226,41 +215,62 @@ export default function ProdukClient({
   };
 
   const [createOpen, setCreateOpen] = useState(false);
-   useEffect(() => {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.altKey && e.key === "n") {
-          e.preventDefault();
-          setCreateOpen(true);
-        }
-      };
-      document.addEventListener("keydown", handleKeyDown);
-      return () => document.removeEventListener("keydown", handleKeyDown);
-    }, []);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === "n") {
+        e.preventDefault();
+        setCreateOpen(true);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+
+  const openDeleteConfirmation = (product: Product) => {
+    setProductToDelete(product);
+    setDeleteOpen(true);
+  };
+
+  const closeDeleteConfirmation = () => {
+    setDeleteOpen(false);
+    setProductToDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+
+    const product = productToDelete;
+    closeDeleteConfirmation();
+    await handleDelete(product);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="mx-auto max-w-3xl px-4 py-6 md:px-8 md:py-8">
+      <section className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">
         <div>
           <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
-            Produk
-          </h1>
-          <div className="px-4 pt-4">
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 cursor-pointer"
-          >
-            <span className="flex items-center gap-2">
-              <RiAddLine size={16} />
-              Tambah Product
-            </span>
+            <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
+              Produk
+            </h1>
+            <div className="px-4 pt-4">
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <RiAddLine size={16} />
+                  Tambah Product
+                </span>
 
-            <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-400">
-              Alt + N
-            </kbd>
-          </button>
-        </div>
+                <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-400">
+                  Alt + N
+                </kbd>
+              </button>
+            </div>
           </div>
           <p className="mt-1 text-sm text-gray-500">
             {filteredProducts.length} produk ditemukan
@@ -305,24 +315,24 @@ export default function ProdukClient({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-medium text-gray-900">
+                      <p className="truncate text-md font-medium text-gray-900">
                         {p.name}
                       </p>
-                      <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">
+                      <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[12px] font-medium text-gray-600">
                         {p.category}
                       </span>
                     </div>
-                    <p className="mt-0.5 truncate text-xs text-gray-500">
+                    <p className="mt-0.5 truncate text-sm text-gray-500">
                       {p.description || "Tidak ada deskripsi"}
                     </p>
                   </div>
 
                   <div className="shrink-0 text-right">
-                    <p className="font-mono text-sm font-semibold text-gray-900">
+                    <p className="font-mono text-md font-semibold text-gray-900">
                       {formatPrice(p.price)}
                     </p>
                     <p
-                      className={`text-[11px] ${p.stock > 0 ? "text-gray-400" : "text-rose-500"}`}
+                      className={`text-[14px] ${p.stock > 0 ? "text-gray-400" : "text-rose-500"}`}
                     >
                       {p.stock > 0 ? `Stok ${p.stock}` : "Habis"}
                     </p>
@@ -338,18 +348,18 @@ export default function ProdukClient({
                       }}
                       className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     >
-                      <RiPencilLine size={16} />
+                      <RiPencilLine size={20} />
                     </button>
                     <button
                       type="button"
                       aria-label={`Hapus ${p.name}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        void handleDelete(p);
+                        openDeleteConfirmation(p);
                       }}
                       className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
                     >
-                      <RiDeleteBinLine size={16} />
+                      <RiDeleteBinLine size={20} />
                     </button>
                   </div>
                 </li>
@@ -419,8 +429,48 @@ export default function ProdukClient({
               </button>
               <button
                 type="button"
-                onClick={() => void handleDelete(selectedProduct)}
+                onClick={() => {
+                  openDeleteConfirmation(selectedProduct);
+                  setSelectedProduct(null);
+                }}
                 className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100"
+              >
+                <RiDeleteBinLine size={16} />
+                Hapus
+              </button>
+            </div>
+          </div>
+        )}
+      </PleasePop>
+
+      {/* POP UP CONFIRM DELETE */}
+      <PleasePop
+        style="hard-shadow"
+        isOpen={deleteOpen}
+        onClose={closeDeleteConfirmation}
+        title="Hapus Produk?"
+      >
+        {productToDelete && (
+          <div className="space-y-4">
+            <p className="text-,d text-gray-600">
+              Produk{" "}
+              <span className="font-semibold text-gray-900">
+                {productToDelete.name}
+              </span>{" "}
+              akan dihapus secara permanen.
+            </p>
+            <div className="flex gap-3 border-t border-dashed border-black/20 pt-4">
+              <button
+                type="button"
+                onClick={closeDeleteConfirmation}
+                className="flex flex-1 cursor-pointer hard-shadow items-center justify-center rounded-xl border border-black bg-white px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => void confirmDelete()}
+                className="flex flex-1 hard-shadow cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100"
               >
                 <RiDeleteBinLine size={16} />
                 Hapus

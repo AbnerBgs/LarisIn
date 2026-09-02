@@ -17,12 +17,22 @@ export default async function OrdersPage() {
   const tomorrowStart = new Date(todayStart);
   tomorrowStart.setDate(tomorrowStart.getDate() + 1);
 
-  const [products, todayServed] = await Promise.all([
+  const [products, todayServed, profile] = await Promise.all([
     getProduk(userId),
     prisma.penjualan.count({
       where: { userId, createdAt: { gte: todayStart, lt: tomorrowStart } },
     }),
+    prisma.umkmProfile.findUnique({
+      where: { userId },
+      select: { name: true },
+    }),
   ]);
 
-  return <OrdersForm products={products} todayServed={todayServed} />;
+  return (
+    <OrdersForm
+      products={products}
+      todayServed={todayServed}
+      businessName={profile?.name}
+    />
+  );
 }

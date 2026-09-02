@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RiFileTextLine } from "@remixicon/react";
+import { RiDeleteBinLine, RiFileTextLine } from "@remixicon/react";
 import * as XLSX from "xlsx";
+import PleasePop from "@/components/ui/please-pop";
 
 type SaleRow = {
   orderId: string;
@@ -49,9 +50,6 @@ export default function PenjualanPage() {
   };
 
   const handleDelete = async (orderId: string) => {
-    const confirmed = window.confirm(`Hapus transaksi ${orderId}?`);
-    if (!confirmed) return;
-
     try {
       const res = await fetch(
         `/api/orders?orderNumber=${encodeURIComponent(orderId)}`,
@@ -97,6 +95,28 @@ export default function PenjualanPage() {
     XLSX.writeFile(workbook, `transactions_${Date.now()}.xlsx`);
   };
 
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] =
+    useState<SaleRow | null>(null);
+
+  const openDeleteConfirmation = (transaction: SaleRow) => {
+    setTransactionToDelete(transaction);
+    setDeleteOpen(true);
+  };
+
+  const closeDeleteConfirmation = () => {
+    setDeleteOpen(false);
+    setTransactionToDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!transactionToDelete) return;
+
+    const orderId = transactionToDelete.orderId;
+    closeDeleteConfirmation();
+    await handleDelete(orderId);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-7">
       <section className="mx-auto group border border-black hard-shadow-static max-w-7xl px-4 py-6 md:px-8 md:pb-8 bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -132,7 +152,7 @@ export default function PenjualanPage() {
               {loading ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="py-6 px-6 text-center text-gray-500"
                   >
                     Memuat transaksi...
@@ -141,7 +161,7 @@ export default function PenjualanPage() {
               ) : transactions.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="py-6 px-6 text-center text-gray-500"
                   >
                     Belum ada transaksi.
@@ -162,9 +182,10 @@ export default function PenjualanPage() {
                     <td className="py-3 px-6">
                       <button
                         type="button"
-                        onClick={() => handleDelete(t.orderId)}
+                        onClick={() => openDeleteConfirmation(t)}
                         className="rounded-md border border-black hard-shadow bg-red-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-red-800"
                       >
+                        <RiDeleteBinLine size={14} className="mr-1 inline" />
                         Hapus
                       </button>
                     </td>
@@ -175,6 +196,42 @@ export default function PenjualanPage() {
           </table>
         </div>
       </section>
+
+      <PleasePop
+        style="hard-shadow"
+        isOpen={deleteOpen}
+        onClose={closeDeleteConfirmation}
+        title="Hapus Transaksi?"
+      >
+        {transactionToDelete && (
+          <div className="space-y-4">
+            <p className="text-md text-gray-600">
+              Transaksi{" "}
+              <span className="font-semibold text-gray-900">
+                {transactionToDelete.orderId}
+              </span>{" "}
+              akan dihapus secara permanen.
+            </p>
+            <div className="flex gap-3 border-t border-dashed border-black/20 pt-4">
+              <button
+                type="button"
+                onClick={closeDeleteConfirmation}
+                className="flex flex-1 cursor-pointer items-center justify-center rounded-xl border border-black bg-white px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => void confirmDelete()}
+                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100"
+              >
+                <RiDeleteBinLine size={16} />
+                Hapus
+              </button>
+            </div>
+          </div>
+        )}
+      </PleasePop>
     </div>
   );
 }

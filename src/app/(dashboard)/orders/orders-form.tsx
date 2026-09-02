@@ -43,11 +43,16 @@ interface OrdersFormProps {
   products: Product[];
   /** Jumlah pelanggan yang sudah dilayani kasir hari ini (dari server). */
   todayServed?: number;
+  businessName?: string;
 }
 
 let orderSequence = 0;
 
-export default function OrdersForm({ products, todayServed }: OrdersFormProps) {
+export default function OrdersForm({
+  products,
+  todayServed,
+  businessName,
+}: OrdersFormProps) {
   const [formData, setFormData] = useState<OrderFormData>({
     cashierName: "",
     paymentType: "qris",
@@ -398,6 +403,7 @@ export default function OrdersForm({ products, todayServed }: OrdersFormProps) {
               orderNumber={orderNumber}
               paymentType={formData.paymentType}
               items={formData.items}
+              businessName={businessName}
               onPrint={handlePrintReceipt}
             />
           </div>
