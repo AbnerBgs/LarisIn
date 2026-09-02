@@ -147,24 +147,6 @@ export default function Navbar() {
         </div>
         
 
-        {/* Buat Baru */}
-        <div className="px-4 pt-4">
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 cursor-pointer"
-          >
-            <span className="flex items-center gap-2">
-              <RiAddLine size={16} />
-              Buat Baru
-            </span>
-
-            <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-400">
-              Alt + N
-            </kbd>
-          </button>
-        </div>
-
         {/* Navigation */}
         <nav className="flex-1 space-y-5 overflow-y-auto px-3 pt-4">
           {navMenus.map(({ label, navItems }) => (
@@ -289,35 +271,10 @@ export default function Navbar() {
         </ul>
       </nav>
 
-      {/* PopUp "Buat Baru" — produk & transaksi */}
+      {/* PopUp "Buat Baru" — produk */}
       <CreateNewDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        onSaveTransaction={async (input) => {
-          try {
-            const response = await fetch("/api/finance", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(input),
-            });
-
-            if (!response.ok) {
-              const err = await response.json().catch(() => null);
-              throw new Error(err?.error || "Gagal menyimpan transaksi");
-            }
-
-            // Beri tahu halaman Keuangan (jika sedang terbuka) untuk muat ulang.
-            window.dispatchEvent(new CustomEvent("finance-updated"));
-            setCreateOpen(false);
-          } catch (error) {
-            console.error(error);
-            alert(
-              error instanceof Error
-                ? error.message
-                : "Gagal menyimpan transaksi",
-            );
-          }
-        }}
         onSaveProduct={() => {
           // Produk sudah disimpan ke API di dalam ProductForm.
           setCreateOpen(false);

@@ -449,7 +449,6 @@ export default function CekUmkmPage() {
                 <RiMapPin2Line className="h-4 w-4 shrink-0 text-slate-400" />
                 {selected.area || selected.city}
               </p>
-              {/* 👈 Tampilan Jam Buka Dinamis di Modal Detail */}
               <p className="flex items-center gap-2">
                 <RiTimeLine className="h-4 w-4 shrink-0 text-slate-400" />
                 {selected.openHours ? `Buka ${selected.openHours}` : "Jam operasional belum diisi"}
