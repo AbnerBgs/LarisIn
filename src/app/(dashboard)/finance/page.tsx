@@ -366,6 +366,19 @@ export default function FinancePage() {
     loadTarget();
   }, [loadTarget]);
 
+  // Buka popup "Tambah Transaksi" dengan Alt + N — pola yang sama
+  // dengan pintasan tambah produk di halaman Produk.
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === "n") {
+        e.preventDefault();
+        setDialogOpen(true);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const period = useMemo(() => getFinancePeriod(periodKey), [periodKey]);
   const summary = useMemo(
     () => summarizeTransactions(transactions, period, sales),
@@ -632,10 +645,12 @@ export default function FinancePage() {
             <button
               type="button"
               onClick={() => setDialogOpen(true)}
-              className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-black bg-amber-300 px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-amber-400 hard-shadow"
+              className="flex cursor-pointer items-center gap-2 rounded-xl border border-black bg-amber-300 px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-amber-400 hard-shadow"
             >
-              <RiAddLine size={16} />
-              Tambah Transaksi
+              <span className="flex items-center gap-1.5">
+                <RiAddLine size={16} />
+                Tambah Transaksi
+              </span>
             </button>
           </div>
         </div>

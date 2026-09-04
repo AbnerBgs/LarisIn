@@ -7,6 +7,7 @@ import PleaseReveal from "@/components/ui/please-reveal";
 import PleaseSelect from "@/components/ui/please-select";
 import {
   RiBriefcaseLine,
+  RiCupLine,
   RiMapPin2Line,
   RiPaletteLine,
   RiRefreshLine,
@@ -15,6 +16,7 @@ import {
   RiSeedlingLine,
   RiShoppingBagLine,
   RiStarFill,
+  RiStore2Line,
   RiTimeLine,
   RiToolsLine,
   RiTShirtLine,
@@ -27,7 +29,15 @@ import {
 /* Tipe Data                                                          */
 /* ------------------------------------------------------------------ */
 
-type CategoryKey = "kuliner" | "fashion" | "kerajinan" | "jasa" | "pertanian";
+type CategoryKey =
+  | "warung"
+  | "kedai"
+  | "kuliner"
+  | "toko"
+  | "fashion"
+  | "kerajinan"
+  | "jasa"
+  | "pertanian";
 
 interface CatalogProduct {
   id?: string;
@@ -60,7 +70,10 @@ const CATEGORY_META: Record<
   CategoryKey,
   { label: string; code: string; icon: ElementType }
 > = {
+  warung: { label: "Warung", code: "WRG", icon: RiStore2Line },
+  kedai: { label: "Kedai & Kafe", code: "KDY", icon: RiCupLine },
   kuliner: { label: "Kuliner", code: "KUL", icon: RiRestaurantLine },
+  toko: { label: "Toko Kelontong", code: "TKO", icon: RiShoppingBagLine },
   fashion: { label: "Fashion", code: "FSH", icon: RiTShirtLine },
   kerajinan: { label: "Kerajinan", code: "KRJ", icon: RiPaletteLine },
   jasa: { label: "Jasa", code: "JSA", icon: RiToolsLine },

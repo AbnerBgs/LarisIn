@@ -17,7 +17,10 @@ import {
 
 // Kunci kategori harus sama dengan CATEGORY_META di halaman /cek-umkm.
 const UMKM_CATEGORIES = [
+  { value: "warung", label: "Warung" },
+  { value: "kedai", label: "Kedai & Kafe" },
   { value: "kuliner", label: "Kuliner" },
+  { value: "toko", label: "Toko Kelontong" },
   { value: "fashion", label: "Fashion" },
   { value: "kerajinan", label: "Kerajinan" },
   { value: "jasa", label: "Jasa" },

@@ -95,6 +95,18 @@ export default function PenjualanPage() {
     XLSX.writeFile(workbook, `transactions_${Date.now()}.xlsx`);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.altKey && event.key.toLowerCase() === "e") {
+        event.preventDefault();
+        handleExport();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [transactions]);
+
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] =
     useState<SaleRow | null>(null);

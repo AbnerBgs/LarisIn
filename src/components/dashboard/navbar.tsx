@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   RiAddLine,
   RemixiconComponentType,
@@ -93,6 +93,9 @@ const navMenus: NavCategory[] = [
   },
 ];
 
+// Urutan menu samping untuk pintasan Alt + angka (1 = Dashboard, dst.).
+const shortcutPages: NavItem[] = navMenus.flatMap(({ navItems }) => navItems);
+
 const mobileNavItems: NavItem[] = [
   {
     label: "Dashboard",
@@ -118,20 +121,39 @@ const mobileNavItems: NavItem[] = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isLoaded, user } = useUser();
   const [createOpen, setCreateOpen] = useState(false);
 
-  // Buka popup "Buat Baru" dengan alt + N.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.altKey && e.key === "n") {
+      if (!e.altKey) return;
+
+      // Alt + N: buka popup "Buat Baru" — kecuali di halaman yang
+      // punya pintasan Alt + N sendiri (Produk, Keuangan).
+      if (e.key === "n") {
         e.preventDefault();
+        if (
+          pathname.startsWith("/product") ||
+          pathname.startsWith("/finance")
+        ) {
+          return;
+        }
         setCreateOpen(true);
+        return;
+      }
+
+      // Alt + angka: lompat ke menu samping sesuai urutannya.
+      const index = Number(e.key) - 1;
+      const target = shortcutPages[index];
+      if (target) {
+        e.preventDefault();
+        router.push(target.href);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [pathname, router]);
 
   return (
     <>

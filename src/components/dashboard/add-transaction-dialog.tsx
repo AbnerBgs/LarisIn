@@ -4,7 +4,7 @@
 // Dua langkah: pilih jenis (pendapatan/pengeluaran), lalu isi formulir.
 // Formulir dipakai bersama dengan CreateNewDialog (lihat TransactionForm).
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   RiArrowDownCircleLine,
   RiArrowUpCircleLine,
@@ -39,6 +39,26 @@ export default function AddTransactionDialog({
 
   const backToChoose = () => setStep("choose");
 
+  // Pintasan angka di langkah pilih jenis: 1 = pendapatan, 2 = pengeluaran.
+  // Hanya aktif saat langkah pilih jenis terbuka — di langkah formulir
+  // ada input angka sehingga pintasan dimatikan.
+  useEffect(() => {
+    if (!open || step !== "choose") return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "1") {
+        e.preventDefault();
+        startForm("income");
+      } else if (e.key === "2") {
+        e.preventDefault();
+        startForm("expense");
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, step]);
+
   const dialogTitle =
     step === "choose"
       ? "Tambah Transaksi"
@@ -63,9 +83,11 @@ export default function AddTransactionDialog({
               <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
                 <RiArrowUpCircleLine size={22} />
               </span>
-              <span>
-                <span className="block text-sm font-semibold text-gray-900">
-                  Tambah Pendapatan
+              <span className="w-full">
+                <span className="flex items-center justify-between gap-2">
+                  <span className="block text-sm font-semibold text-gray-900">
+                    Tambah Pendapatan
+                  </span>
                 </span>
                 <span className="mt-1 block text-xs leading-relaxed text-gray-500">
                   Catat uang masuk dari penjualan, pesanan, atau jasa.
@@ -81,9 +103,11 @@ export default function AddTransactionDialog({
               <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
                 <RiArrowDownCircleLine size={22} />
               </span>
-              <span>
-                <span className="block text-sm font-semibold text-gray-900">
-                  Tambah Pengeluaran
+              <span className="w-full">
+                <span className="flex items-center justify-between gap-2">
+                  <span className="block text-sm font-semibold text-gray-900">
+                    Tambah Pengeluaran
+                  </span>
                 </span>
                 <span className="mt-1 block text-xs leading-relaxed text-gray-500">
                   Catat biaya stok, operasional, gaji, dan lainnya.

@@ -1,10 +1,4 @@
 import Link from 'next/link';
-import {
-  RiGithubLine,
-  RiInstagramLine,
-  RiLinkedinLine,
-  RiArrowRightUpLine,
-} from '@remixicon/react';
 import Image from 'next/image';
 
 export default function FooterLanding() {
@@ -31,44 +25,52 @@ export default function FooterLanding() {
             </p>
           </div>
 
-          {/* Product */}
+          {/* Menu */}
           <div>
             <h3 className="text-sm font-semibold text-white">
-              Produk
+              Menu
             </h3>
 
             <ul className="mt-5 space-y-3">
               <li>
                 <Link
-                  href="#features"
+                  href="/"
                   className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
-                  Fitur
+                  Beranda
                 </Link>
               </li>
 
               <li>
                 <Link
-                  href="#how-it-works"
+                  href="/cek-umkm"
                   className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
-                  Cara Kerja
+                  Cek UMKM
                 </Link>
               </li>
 
               <li>
                 <Link
-                  href="#demo"
-                  className="inline-flex items-center gap-1 text-sm text-zinc-400 transition-colors hover:text-white"
+                  href="/dashboard"
+                  className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
-                  Demo
-                  <RiArrowRightUpLine size={14} />
+                  Dashboard
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/help"
+                  className="text-sm text-zinc-400 transition-colors hover:text-white"
+                >
+                  Panduan
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Features */}
+          {/* Fitur */}
           <div>
             <h3 className="text-sm font-semibold text-white">
               Fitur
@@ -77,7 +79,7 @@ export default function FooterLanding() {
             <ul className="mt-5 space-y-3">
               <li>
                 <Link
-                  href="#features"
+                  href="/product"
                   className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
                   Manajemen Produk
@@ -86,43 +88,34 @@ export default function FooterLanding() {
 
               <li>
                 <Link
-                  href="#features"
+                  href="/orders"
                   className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
-                  Barcode Scanner
+                  Kasir
                 </Link>
               </li>
 
               <li>
                 <Link
-                  href="#features"
+                  href="/sales"
                   className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
-                  Manajemen Stok
+                  Riwayat Penjualan
                 </Link>
               </li>
 
               <li>
                 <Link
-                  href="#features"
+                  href="/finance"
                   className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
-                  Penjualan
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href="#features"
-                  className="text-sm text-zinc-400 transition-colors hover:text-white"
-                >
-                  Business Analytics
+                  Keuangan
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Bantuan */}
           <div>
             <h3 className="text-sm font-semibold text-white">
               Bantuan
@@ -131,37 +124,28 @@ export default function FooterLanding() {
             <ul className="mt-5 space-y-3">
               <li>
                 <Link
-                  href="#faq"
+                  href="/help"
                   className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
-                  FAQ
+                  Panduan Pengguna
                 </Link>
               </li>
 
               <li>
                 <Link
-                  href="#guide"
+                  href="/help#faq"
                   className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
-                  Panduan
+                  Pertanyaan Umum
                 </Link>
               </li>
 
               <li>
                 <Link
-                  href="#contact"
+                  href="/help#shortcut"
                   className="text-sm text-zinc-400 transition-colors hover:text-white"
                 >
-                  Hubungi Kami
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href="#feedback"
-                  className="text-sm text-zinc-400 transition-colors hover:text-white"
-                >
-                  Berikan Feedback
+                  Pintasan Keyboard
                 </Link>
               </li>
             </ul>
@@ -174,28 +158,9 @@ export default function FooterLanding() {
             © 2026 LarisIn. All rights reserved.
           </p>
 
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link
-              href="/privacy"
-              className="text-zinc-500 transition-colors hover:text-white"
-            >
-              Privacy Policy
-            </Link>
-
-            <Link
-              href="/terms"
-              className="text-zinc-500 transition-colors hover:text-white"
-            >
-              Terms of Service
-            </Link>
-
-            <Link
-              href="#contact"
-              className="text-zinc-500 transition-colors hover:text-white"
-            >
-              Contact
-            </Link>
-          </div>
+          <p className="text-zinc-500">
+            Dibuat untuk membantu UMKM Indonesia berkembang.
+          </p>
         </div>
       </div>
     </footer>

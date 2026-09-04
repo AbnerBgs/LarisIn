@@ -267,13 +267,13 @@ export default async function Dashboard({
                   Berikut adalah Statistik Penjualan.
                 </p>
               </div>
-              <button
-                type="button"
+              <a
+                href="/finance"
                 className="flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
                 Lihat
                 <RiArrowRightLine size={16} />
-              </button>
+              </a>
             </div>
 
             <div className="mt-4 rounded-xl border border-gray-200 bg-white p-5 md:p-6">

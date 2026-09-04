@@ -265,10 +265,6 @@ export default function ProdukClient({
                   <RiAddLine size={16} />
                   Tambah Product
                 </span>
-
-                <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-400">
-                  Alt + N
-                </kbd>
               </button>
             </div>
           </div>
