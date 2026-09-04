@@ -390,7 +390,7 @@ export default function HelpPage() {
       {/* threshold 0: bagian ini tinggi, 50% dari elemen tidak selalu
           muat di layar sehingga animasi reveal bisa tidak pernah jalan. */}
       <PleaseReveal threshold={0}>
-        <section className="py-14 border-b border-slate-200 bg-slate-50">
+        <section id="fitur" className="py-14 border-b border-slate-200 bg-slate-50">
           <div className="max-w-6xl mx-auto px-6 w-full">
             <SectionHeader
               eyebrow="Panduan tiap halaman"
