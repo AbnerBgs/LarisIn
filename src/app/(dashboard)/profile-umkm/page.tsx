@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect, ComponentType } from "react";
+import Link from "next/link";
 import {
+  RiArrowLeftLine,
   RiBriefcaseLine,
   RiCloseLine,
   RiEditLine,
@@ -12,10 +14,9 @@ import {
   RiWhatsappLine,
   RiSaveLine,
   RiStore2Line,
-  RiTimeLine, 
+  RiTimeLine,
 } from "@remixicon/react";
 
-// Kunci kategori harus sama dengan CATEGORY_META di halaman /cek-umkm.
 const UMKM_CATEGORIES = [
   { value: "warung", label: "Warung" },
   { value: "kedai", label: "Kedai & Kafe" },
@@ -32,7 +33,6 @@ export default function EditProfile() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  // States Utama
   const [name, setName] = useState<string>("Nama Usaha");
   const [category, setCategory] = useState<string>("");
   const [openHours, setOpenHours] = useState<string>("");
@@ -49,7 +49,6 @@ export default function EditProfile() {
   const [web, setWeb] = useState<string>("");
   const [description, setDescription] = useState<string>("");
 
-  // Draft States (untuk form edit)
   const [draftName, setDraftName] = useState<string>("");
   const [draftCategory, setDraftCategory] = useState<string>("");
   const [draftOpenHours, setDraftOpenHours] = useState<string>("");
@@ -174,7 +173,9 @@ export default function EditProfile() {
         setIsEditing(false);
 
         window.dispatchEvent(
-          new CustomEvent("profile-updated", { detail: { name: payload.name } })
+          new CustomEvent("profile-updated", {
+            detail: { name: payload.name },
+          }),
         );
       } else {
         alert("Gagal menyimpan profil ke server.");
@@ -194,16 +195,26 @@ export default function EditProfile() {
   return (
     <main className="min-h-screen bg-gray-50">
       <section className="mx-auto max-w-5xl px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">
-        <div className="mb-6">
-          <p className="font-mono text-xs font-semibold uppercase tracking-widest text-gray-400">
-            Sistem
-          </p>
-          <h1 className="mt-1 text-xl font-bold text-gray-900 md:text-2xl">
-            PROFIL UMKM
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Kelola informasi usaha yang akan ditampilkan di profilmu.
-          </p>
+        <Link
+          href="/more"
+          aria-label="Kembali ke menu"
+          className="inline-flex mb-4 gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 md:hidden"
+        >
+          <RiArrowLeftLine size={17} />
+          Kembali
+        </Link>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <p className="font-mono text-xs font-semibold uppercase tracking-widest text-gray-400">
+              Sistem
+            </p>
+            <h1 className="mt-1 text-xl font-bold text-gray-900 md:text-2xl">
+              PROFIL UMKM
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Kelola informasi usaha yang akan ditampilkan di profilmu.
+            </p>
+          </div>
         </div>
 
         <div className="w-full overflow-hidden group hard-shadow-static border-black rounded-2xl border bg-white">
@@ -371,7 +382,13 @@ export default function EditProfile() {
                         }}
                         className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
-                      <span className={!draftIsOpeningJob ? "text-slate-900 font-semibold" : "text-slate-500"}>
+                      <span
+                        className={
+                          !draftIsOpeningJob
+                            ? "text-slate-900 font-semibold"
+                            : "text-slate-500"
+                        }
+                      >
                         Tidak Membuka Lowongan
                       </span>
                     </label>
@@ -384,7 +401,13 @@ export default function EditProfile() {
                         onChange={() => setDraftIsOpeningJob(true)}
                         className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
-                      <span className={draftIsOpeningJob ? "text-blue-600 font-semibold" : "text-slate-500"}>
+                      <span
+                        className={
+                          draftIsOpeningJob
+                            ? "text-blue-600 font-semibold"
+                            : "text-slate-500"
+                        }
+                      >
                         Sedang Membuka Lowongan
                       </span>
                     </label>
@@ -393,12 +416,15 @@ export default function EditProfile() {
                   {draftIsOpeningJob && (
                     <div className="pt-1">
                       <label className="block text-xs font-medium text-slate-500 mb-1">
-                        Posisi Pekerjaan (Pisahkan dengan koma jika lebih dari satu)
+                        Posisi Pekerjaan (Pisahkan dengan koma jika lebih dari
+                        satu)
                       </label>
                       <textarea
                         rows={2}
                         value={draftJobsText}
-                        onChange={(event) => setDraftJobsText(event.target.value)}
+                        onChange={(event) =>
+                          setDraftJobsText(event.target.value)
+                        }
                         placeholder="Contoh: Barista (Full-time), Staf Gudang, Kasir"
                         className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500"
                       />
@@ -472,7 +498,9 @@ export default function EditProfile() {
               </div>
             ) : (
               <div className="space-y-7">
-                <div className="grid gap-6 md:grid-cols-3"> {/* Changed to 3 cols for alignment */}
+                <div className="grid gap-6 md:grid-cols-3">
+                  {" "}
+                  {/* Changed to 3 cols for alignment */}
                   <div>
                     <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                       <RiMapPin2Line size={15} />
@@ -484,7 +512,6 @@ export default function EditProfile() {
                         .join(", ") || "Belum diisi"}
                     </p>
                   </div>
-
                   <div>
                     <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                       <RiTimeLine size={15} />
@@ -494,7 +521,6 @@ export default function EditProfile() {
                       {openHours || "Belum diisi"}
                     </p>
                   </div>
-
                   <div>
                     <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                       <RiWhatsappLine size={15} />
